@@ -35,10 +35,29 @@ const HITS_PATH = DEV ? "tracklog/hits.dev.txt" : "tracklog/hits.txt";
 // Returns null only when the blob genuinely does not exist yet (a brand new
 // store). Anything else — a failed fetch, a bad status — throws, so callers
 // can tell "there is nothing here" apart from "I could not find out".
-async function readBlobText(prefix: string): Promise<string | null> {
+// list() is a billed API call, and the naive version ran one on every render
+// of every page. Because blobs here are written with addRandomSuffix:false to
+// a fixed pathname, a blob's URL never changes, so it only has to be resolved
+// once per instance and can be remembered — and writes can seed it for free.
+const urlCache = new Map<string, string>();
+
+function rememberUrl(pathname: string, url: string) {
+  urlCache.set(pathname, url);
+}
+
+async function blobUrl(prefix: string): Promise<string | null> {
+  const known = urlCache.get(prefix);
+  if (known) return known;
   const { blobs } = await list({ prefix, limit: 1 });
   if (!blobs.length) return null;
-  const res = await fetch(blobs[0].url, { cache: "no-store" });
+  rememberUrl(prefix, blobs[0].url);
+  return blobs[0].url;
+}
+
+async function readBlobText(prefix: string): Promise<string | null> {
+  const url = await blobUrl(prefix);
+  if (url === null) return null;
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) {
     throw new Error(`blob read failed for ${prefix}: HTTP ${res.status}`);
   }
@@ -86,7 +105,7 @@ export async function readJournal(): Promise<Journal> {
 
 export async function writeJournal(journal: Journal): Promise<void> {
   lastWrite = { journal: clone(journal), at: Date.now() };
-  await put(TRACKS_PATH, JSON.stringify(journal, null, 2), {
+  const res = await put(TRACKS_PATH, JSON.stringify(journal, null, 2), {
     access: "public",
     addRandomSuffix: false,
     allowOverwrite: true,
@@ -99,25 +118,43 @@ export async function writeJournal(journal: Journal): Promise<void> {
     // because the CDN cache key ignores the query string.
     cacheControlMaxAge: 0,
   });
+  rememberUrl(TRACKS_PATH, res.url);
 }
 
-// A real, persistent hit counter. Lives in its own blob so visitor traffic
-// never races with track writes. If the store is unreachable it falls back
-// to a suitably vintage number.
+// The hit counter used to cost a read *and a write* on every single page view,
+// which made routine traffic the most expensive thing the site did — writes
+// are the scarcest operation on the free tier, and this is what got the store
+// suspended. The count is now held in memory and flushed at most once every
+// five minutes.
+//
+// The trade is that the counter is approximate: buffered hits are lost when an
+// instance recycles, and separate instances each flush their own tally. For a
+// vanity counter that is a fine price for turning per-visitor writes into a
+// handful per hour. It was never exact under concurrency anyway.
+let hits: number | null = null;
+let lastHitFlush = 0;
+const HIT_FLUSH_MS = 5 * 60 * 1000;
+
 export async function bumpHits(): Promise<number> {
   try {
-    const current =
-      parseInt(((await readBlobText(HITS_PATH)) ?? "").trim(), 10) || 0;
-    const next = current + 1;
-    await put(HITS_PATH, String(next), {
+    if (hits === null) {
+      hits = parseInt(((await readBlobText(HITS_PATH)) ?? "").trim(), 10) || 0;
+    }
+    hits += 1;
+
+    if (Date.now() - lastHitFlush < HIT_FLUSH_MS) return hits;
+    lastHitFlush = Date.now();
+
+    const res = await put(HITS_PATH, String(hits), {
       access: "public",
       addRandomSuffix: false,
       allowOverwrite: true,
       contentType: "text/plain",
       cacheControlMaxAge: 0,
     });
-    return next;
+    rememberUrl(HITS_PATH, res.url);
+    return hits;
   } catch {
-    return 1337;
+    return hits ?? 1337;
   }
 }

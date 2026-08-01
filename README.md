@@ -184,6 +184,28 @@ Optional env vars: `NEXT_PUBLIC_SITE_TITLE`, `NEXT_PUBLIC_SITE_TAGLINE`,
 `NEXT_PUBLIC_` values are baked in at build time, so changing them needs a
 redeploy.
 
+## Blob usage
+
+Writes are the scarcest operation on the free tier, and this site used to spend
+one on **every page view** — the hit counter did a read *and* a write per
+visitor, and both the journal read and the counter read each made their own
+`list()` call. That is what suspended the store once.
+
+Now:
+
+- blob URLs are resolved once per instance and remembered. They never change,
+  because everything is written with `addRandomSuffix: false` to a fixed
+  pathname, and writes seed the cache for free. Steady state: no `list()` calls.
+- the hit count is held in memory and flushed at most once every five minutes,
+  so ordinary traffic costs no writes at all. The counter is approximate as a
+  result — buffered hits are lost when an instance recycles, and separate
+  instances flush their own tallies. It was never exact under concurrency.
+- the journal read is served from the edge for 60s, so a busy hour costs at
+  most ~60 origin fetches.
+
+Steady-state cost per page view is therefore one edge-cached fetch and nothing
+else. Writes happen only when you add, edit or delete a track.
+
 ## Caveats
 
 - **Newly shared tracks can take up to 60 seconds to appear.** Blobs default to
