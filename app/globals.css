@@ -1,28 +1,29 @@
 @import url("https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,400;0,700;1,400&display=swap");
 
-/* Design language borrowed from late-90s skinnable media players: gunmetal
-   panels with hard 1px bevels, a recessed black LCD readout in phosphor
-   green, and chunky beveled buttons. Nothing here is copied from Winamp —
-   it's all CSS gradients and borders, and none of the functional chrome
-   (equalizer, transport controls, visualizer) is reproduced, since this is
-   a journal and those would be lying about what the page can do. */
+/* Design language borrowed from late-90s skinnable desktop media players:
+   steel-blue panels with hard 1px bevels, gradient title bars, and black
+   playlist wells in phosphor green. Nothing is copied from any player —
+   it's all CSS gradients and borders — and none of the functional chrome
+   (equalizer, transport, visualiser) is reproduced, since this page can't
+   play anything itself and those controls would misstate what it does. */
 :root {
-  --desk: #12121b;
-  --face: #3e3e55;
-  --face-lo: #32324a;
-  --face-hi: #4a4a66;
-  --lt: #7d7da0;
-  --dk: #0e0e16;
-  --title-a: #5f5f9c;
-  --title-b: #262641;
-  --lcd-bg: #06120a;
-  --lcd: #21e421;
-  --lcd-dim: #159415;
-  --txt: #e9e9f7;
-  --muted: #b3b3d4;
+  --desk: #0a0d16;
+  --face: #45557d;
+  --face-lo: #354263;
+  --face-hi: #55689a;
+  --lt: #9aabd6;
+  --dk: #0d1220;
+  --title-a: #7183bb;
+  --title-b: #2b3557;
+  --well: #05080f;
+  --well-hi: #0c1320;
+  --lcd: #00f000;
+  --lcd-dim: #00a000;
+  --txt: #f0f4ff;
+  --muted: #c0cdf0;
   --hot: #ff5ca8;
-  --linkblue: #8ab4ff;
-  --linkvisited: #c79bff;
+  --linkblue: #9fc3ff;
+  --linkvisited: #d8b0ff;
 }
 
 * {
@@ -45,8 +46,8 @@ body {
   padding: 28px 10px 64px;
   background-color: var(--desk);
   background-image:
-    radial-gradient(circle, rgba(255, 255, 255, 0.5) 1px, transparent 1.7px),
-    radial-gradient(circle, rgba(140, 140, 220, 0.4) 1px, transparent 1.7px);
+    radial-gradient(circle, rgba(255, 255, 255, 0.45) 1px, transparent 1.7px),
+    radial-gradient(circle, rgba(120, 150, 235, 0.4) 1px, transparent 1.7px);
   background-size:
     170px 170px,
     95px 95px;
@@ -75,35 +76,34 @@ a:visited {
 
 a:hover {
   background: var(--hot);
-  color: #12121b;
+  color: #0a0d16;
 }
 
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
-textarea:focus-visible {
+textarea:focus-visible,
+summary:focus-visible {
   outline: 2px solid var(--lcd);
   outline-offset: 1px;
 }
 
 ::selection {
   background: var(--lcd);
-  color: #06120a;
+  color: #05080f;
 }
 
-/* Raised bevel (buttons, panel faces) */
 .bv {
   border: 2px solid;
   border-color: var(--lt) var(--dk) var(--dk) var(--lt);
 }
 
-/* Recessed bevel (displays, wells) */
 .bvi {
   border: 2px solid;
   border-color: var(--dk) var(--lt) var(--lt) var(--dk);
 }
 
-/* ---------- the window ---------- */
+/* ---------- window ---------- */
 
 .col {
   max-width: 600px;
@@ -111,20 +111,18 @@ textarea:focus-visible {
   background: var(--face);
   border: 2px solid;
   border-color: var(--lt) var(--dk) var(--dk) var(--lt);
-  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.65);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.7);
 }
 
-/* Title bar: horizontal gradient with the grip lines that flank the title
-   on classic player windows, drawn with repeating gradients. */
 .masthead {
   background: linear-gradient(
     180deg,
     var(--title-a) 0%,
     var(--title-b) 68%,
-    #1b1b30 100%
+    #1e2745 100%
   );
   border-bottom: 2px solid var(--dk);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
   text-align: center;
   padding: 10px 12px 9px;
 }
@@ -136,7 +134,7 @@ textarea:focus-visible {
   font-size: 21px;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: #f2f2ff;
+  color: #ffffff;
   text-shadow: 0 1px 0 #000;
   overflow-wrap: anywhere;
   display: flex;
@@ -145,7 +143,7 @@ textarea:focus-visible {
   gap: 10px;
 }
 
-/* Grip lines either side of the title */
+/* Grip lines flanking the title, as on a classic player's title bar */
 .site-title::before,
 .site-title::after {
   content: "";
@@ -153,25 +151,21 @@ textarea:focus-visible {
   height: 9px;
   background: repeating-linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.42) 0 1px,
+    rgba(255, 255, 255, 0.45) 0 1px,
     transparent 1px 3px
   );
-}
-
-.deco {
-  display: none;
 }
 
 .tagline {
   margin: 6px 0 0;
   font-size: 12px;
-  color: #cfcff0;
+  color: #e2e9ff;
 }
 
 .navrow {
   background: var(--face);
   border-bottom: 2px solid var(--dk);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
   text-align: center;
   padding: 7px 8px;
   font-size: 12px;
@@ -181,10 +175,10 @@ textarea:focus-visible {
   margin: 0 3px;
 }
 
-/* ---------- LCD readout ---------- */
+/* ---------- LCD ---------- */
 
 .marquee {
-  background: var(--lcd-bg);
+  background: var(--well);
   color: var(--lcd);
   font-size: 13px;
   padding: 7px 0;
@@ -193,7 +187,7 @@ textarea:focus-visible {
   white-space: nowrap;
   border: 2px solid;
   border-color: var(--dk) var(--lt) var(--lt) var(--dk);
-  text-shadow: 0 0 6px rgba(33, 228, 33, 0.55);
+  text-shadow: 0 0 7px rgba(0, 240, 0, 0.6);
 }
 
 .marquee span {
@@ -213,7 +207,6 @@ textarea:focus-visible {
   padding: 10px 12px;
   background: var(--face-lo);
   font-size: 13px;
-  color: var(--txt);
 }
 
 .setupwarn {
@@ -225,59 +218,30 @@ textarea:focus-visible {
   font-size: 12px;
 }
 
-/* ---------- playlist entries ---------- */
+.nothing {
+  padding: 26px 18px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---------- entries ---------- */
 
 .entry {
-  padding: 12px 12px 8px;
+  padding: 0 8px 8px;
 }
 
-.dateline {
-  margin: 0 0 8px;
-  font-size: 12px;
-  color: var(--muted);
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-/* Playlist-style index, in phosphor green like a track number */
-.tracknum {
-  color: var(--lcd);
-  font-weight: bold;
-  flex-shrink: 0;
-}
-
-.stamp {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-/* Tucked up beside the date instead of orphaned on its own line below */
-.permalink {
-  margin-left: auto;
-  flex-shrink: 0;
-  text-decoration: none;
-  color: var(--muted);
-  padding: 0 4px;
-}
-
-.permalink:hover {
-  background: var(--hot);
-  color: #12121b;
-}
-
-.rule {
-  display: none;
-}
-
+/* One black playlist well per track. Everything about the song — art,
+   title, player, note and mood — lives inside this box. */
 .card {
-  background: var(--face-lo);
+  background: var(--well);
   padding: 10px;
+}
+
+.cardtop {
   display: flex;
   gap: 12px;
-  align-items: center;
-  border: 2px solid;
-  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
+  align-items: flex-start;
 }
 
 .art {
@@ -316,6 +280,32 @@ textarea:focus-visible {
 
 .cardmeta {
   min-width: 0;
+  flex: 1;
+}
+
+.numline {
+  margin: 0 0 3px;
+  font-size: 12px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.tracknum {
+  color: var(--lcd);
+  font-weight: bold;
+}
+
+.permalink {
+  margin-left: auto;
+  text-decoration: none;
+  color: #7f8db5;
+  padding: 0 4px;
+}
+
+.permalink:hover {
+  background: var(--hot);
+  color: #05080f;
 }
 
 .tt {
@@ -344,7 +334,6 @@ textarea:focus-visible {
   flex-wrap: wrap;
 }
 
-/* One beveled button per entry, replacing the old chip + text link pair. */
 .provbtn {
   display: inline-block;
   background: linear-gradient(180deg, var(--face-hi), var(--face-lo));
@@ -363,7 +352,7 @@ textarea:focus-visible {
 
 .provbtn:hover {
   background: var(--hot);
-  color: #12121b;
+  color: #05080f;
 }
 
 .provbtn:active {
@@ -376,25 +365,29 @@ textarea:focus-visible {
 }
 
 .embed iframe {
-  max-width: 100%;
+  display: block;
+  width: 100%;
   border: 0;
 }
 
+/* Note and mood now sit inside the track box, under a divider. */
+.cardnotes {
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid #23304a;
+}
+
 .note {
-  margin: 11px 0 0;
-  padding: 9px 11px;
-  background: var(--lcd-bg);
-  border: 2px solid;
-  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
+  margin: 0;
   font-size: 15px;
   line-height: 1.6;
-  color: #d7ffd7;
+  color: #ccffcc;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
 
 .moodline {
-  margin: 9px 0 0;
+  margin: 7px 0 0;
   font-size: 12px;
   color: var(--muted);
 }
@@ -403,80 +396,51 @@ textarea:focus-visible {
   color: var(--lcd);
 }
 
-.entrysep {
-  border-top: 1px solid var(--dk);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-  margin: 4px 8px 0;
+/* ---------- keeper-only editing ---------- */
+
+/* Rendered only when the session cookie checks out server-side, so a
+   logged-out visitor never receives this markup at all. */
+.edit {
+  margin-top: 10px;
+  border-top: 1px solid #23304a;
+  padding-top: 8px;
 }
 
-.nothing {
-  padding: 26px 18px;
-  text-align: center;
-  font-size: 13px;
+.edit summary {
+  cursor: pointer;
+  font-size: 12px;
   color: var(--muted);
+  list-style: none;
 }
 
-/* ---------- counter ---------- */
-
-.counterbox {
-  margin: 10px 8px 8px;
-  background: var(--face-lo);
-  text-align: center;
-  padding: 12px 10px;
-  border: 2px solid;
-  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
+.edit summary::-webkit-details-marker {
+  display: none;
 }
 
-.clabel {
-  margin: 0 0 8px;
+.edit summary:hover {
+  color: var(--lcd);
+}
+
+.editform {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 8px;
+}
+
+.editform label {
   font-size: 11px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: var(--muted);
+  color: #8fa0c8;
+  margin-top: 5px;
 }
 
-.digits {
-  margin: 0;
-}
-
-.dig {
-  display: inline-block;
-  background: var(--lcd-bg);
-  color: var(--lcd);
-  font-family: "Courier New", Courier, monospace;
-  font-size: 17px;
-  font-weight: bold;
-  padding: 3px 7px;
-  border: 1px solid #000;
-  margin: 0 1px;
-  text-shadow: 0 0 6px rgba(33, 228, 33, 0.6);
-}
-
-.footlinks {
-  margin: 10px 0 0;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* ---------- admin ---------- */
-
-.adm-body {
-  padding: 14px;
-}
-
-.adm-login {
-  background: var(--face-lo);
-  padding: 14px;
+.editactions {
   display: flex;
-  flex-direction: column;
   gap: 8px;
-  max-width: 320px;
-  margin: 0 auto;
-}
-
-.adm-login label {
-  font-size: 12px;
-  color: var(--muted);
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 
 input,
@@ -492,16 +456,16 @@ textarea {
   padding: 6px 8px;
   border: 2px solid;
   border-color: var(--dk) var(--lt) var(--lt) var(--dk);
-  background: var(--lcd-bg);
+  background: var(--well-hi);
   color: var(--lcd);
   width: 100%;
 }
 
 textarea {
   font-family: "Comic Sans MS", "Comic Neue", cursive;
-  min-height: 84px;
+  min-height: 70px;
   resize: vertical;
-  color: #d7ffd7;
+  color: #ccffcc;
 }
 
 .btn95 {
@@ -521,84 +485,97 @@ textarea {
 }
 
 .btn95.danger {
-  color: #ff8a8a;
+  color: #ff9d9d;
 }
 
 .adm-bad {
   text-align: center;
-  color: #ff6b6b;
+  color: #ff8a8a;
   font-weight: bold;
-  font-size: 13px;
-}
-
-.adm-hint {
   font-size: 12px;
-  color: var(--muted);
-  text-align: center;
+  margin: 8px 0 0;
 }
 
-.adm-entry {
+/* ---------- counter + keeper login ---------- */
+
+.counterbox {
+  margin: 10px 8px 8px;
   background: var(--face-lo);
-  padding: 12px;
-  margin-bottom: 14px;
-  border: 2px solid;
-  border-color: var(--lt) var(--dk) var(--dk) var(--lt);
+  text-align: center;
+  padding: 12px 10px;
 }
 
-.adm-head {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.adm-head img {
-  width: 44px;
-  height: 44px;
-  border: 2px solid var(--dk);
-  object-fit: cover;
-}
-
-.adm-head .who {
-  min-width: 0;
-  font-size: 13px;
-  color: var(--muted);
-  overflow-wrap: anywhere;
-}
-
-.adm-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.adm-grid label,
-.adm-note label {
-  display: block;
+.clabel {
+  margin: 0 0 8px;
   font-size: 11px;
-  margin-bottom: 3px;
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--muted);
 }
 
-.adm-note {
-  margin-bottom: 8px;
+.digits {
+  margin: 0;
 }
 
-.adm-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
+.dig {
+  display: inline-block;
+  background: var(--well);
+  color: var(--lcd);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 17px;
+  font-weight: bold;
+  padding: 3px 7px;
+  border: 1px solid #000;
+  margin: 0 1px;
+  text-shadow: 0 0 7px rgba(0, 240, 0, 0.65);
 }
 
-.adm-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
+.footlinks {
+  margin: 10px 0 0;
   font-size: 12px;
+  color: var(--muted);
+}
+
+/* Deliberately unobtrusive: a bare "·" that opens the secret prompt. It is
+   only a disclosure widget — the real gate is the server-side cookie check. */
+.keeper {
+  margin-top: 8px;
+}
+
+.keeper summary {
+  cursor: pointer;
+  color: #7f8db5;
+  font-size: 13px;
+  list-style: none;
+}
+
+.keeper summary::-webkit-details-marker {
+  display: none;
+}
+
+.keeperlogin {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-width: 260px;
+  margin: 9px auto 0;
+}
+
+.keeperlogin label {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.keeperbar {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--lcd);
 }
 
 /* ---------- mobile ---------- */
@@ -624,7 +601,7 @@ textarea {
     flex-direction: column;
   }
 
-  /* Keeps the counter pinned to the bottom when there are few entries, so a
+  /* Keeps the counter at the bottom when there are few entries, so a
      near-empty journal still fills the screen the way an app would. */
   .counterbox {
     margin-top: auto;
@@ -644,10 +621,6 @@ textarea {
 
   .tt {
     font-size: 15px;
-  }
-
-  .adm-grid {
-    grid-template-columns: 1fr;
   }
 }
 

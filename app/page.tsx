@@ -1,4 +1,7 @@
+import { isAdmin } from "@/lib/auth";
+import { embedFor } from "@/lib/embed";
 import { bumpHits, readJournal, type Entry, type Journal } from "@/lib/store";
+import { deleteEntry, login, logout, saveEntry } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -7,82 +10,147 @@ const TAGLINE =
   process.env.NEXT_PUBLIC_SITE_TAGLINE ||
   "a public log of songs that altered my brain chemistry";
 const ABOUT = process.env.NEXT_PUBLIC_ABOUT || "";
-const TZ = process.env.NEXT_PUBLIC_TIMEZONE || "America/New_York";
-const EMBEDS = process.env.NEXT_PUBLIC_EMBED_PLAYERS === "true";
 
-function stamp(iso: string): string {
-  return new Date(iso)
-    .toLocaleString("en-US", {
-      timeZone: TZ,
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    })
-    .toLowerCase()
-    .replace(/,\s*/g, " · ");
+function Player({ entry }: { entry: Entry }) {
+  const embed = embedFor(entry);
+  if (!embed) return null;
+  return (
+    <div className="embed">
+      <iframe
+        src={embed.src}
+        title={embed.title}
+        height={embed.height}
+        loading="lazy"
+        allow="encrypted-media; clipboard-write; picture-in-picture"
+        referrerPolicy="strict-origin-when-cross-origin"
+      />
+    </div>
+  );
 }
 
-function TrackEntry({ entry, index }: { entry: Entry; index: number }) {
+function EditPanel({ entry }: { entry: Entry }) {
+  return (
+    <details className="edit">
+      <summary className="crs">✎ edit</summary>
+      <form action={saveEntry} className="editform">
+        <input type="hidden" name="id" value={entry.id} />
+        <label className="crs" htmlFor={`t-${entry.id}`}>
+          title
+        </label>
+        <input id={`t-${entry.id}`} name="title" defaultValue={entry.title} />
+        <label className="crs" htmlFor={`a-${entry.id}`}>
+          artist
+        </label>
+        <input
+          id={`a-${entry.id}`}
+          name="artist"
+          defaultValue={entry.artist ?? ""}
+        />
+        <label className="crs" htmlFor={`n-${entry.id}`}>
+          note
+        </label>
+        <textarea
+          id={`n-${entry.id}`}
+          name="note"
+          defaultValue={entry.note ?? ""}
+        />
+        <label className="crs" htmlFor={`m-${entry.id}`}>
+          mood
+        </label>
+        <input id={`m-${entry.id}`} name="mood" defaultValue={entry.mood ?? ""} />
+        <div className="editactions">
+          <button type="submit" formAction={deleteEntry} className="btn95 danger">
+            delete
+          </button>
+          <button type="submit" className="btn95">
+            save
+          </button>
+        </div>
+      </form>
+    </details>
+  );
+}
+
+function TrackEntry({
+  entry,
+  index,
+  authed,
+}: {
+  entry: Entry;
+  index: number;
+  authed: boolean;
+}) {
   return (
     <article className="entry" id={entry.id}>
-      <p className="dateline crs">
-        <span className="tracknum">{String(index).padStart(2, "0")}.</span>
-        <span className="stamp">{stamp(entry.addedAt)}</span>
-        <a className="permalink" href={`#${entry.id}`} aria-label="permalink">
-          #
-        </a>
-      </p>
-      <div className="rule" />
-      <div className="card bv">
-        {entry.art ? (
-          <img
-            className="art"
-            src={entry.art}
-            alt={`artwork for ${entry.title}`}
-            width={84}
-            height={84}
-            loading="lazy"
-          />
-        ) : (
-          <div className="art artfallback" aria-hidden="true">
-            <span />
+      <div className="card bvi">
+        <div className="cardtop">
+          {entry.art ? (
+            <img
+              className="art"
+              src={entry.art}
+              alt={`artwork for ${entry.title}`}
+              width={84}
+              height={84}
+              loading="lazy"
+            />
+          ) : (
+            <div className="art artfallback" aria-hidden="true">
+              <span />
+            </div>
+          )}
+          <div className="cardmeta">
+            <p className="numline crs">
+              <span className="tracknum">{String(index).padStart(2, "0")}.</span>
+              <a
+                className="permalink"
+                href={`#${entry.id}`}
+                aria-label="permalink"
+              >
+                #
+              </a>
+            </p>
+            <h2 className="tt">{entry.title}</h2>
+            {entry.artist && <p className="ta">{entry.artist}</p>}
+            <p className="cardrow">
+              <a
+                className="provbtn crs"
+                href={entry.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                ▶ from {entry.provider}
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <Player entry={entry} />
+
+        {(entry.note || entry.mood) && (
+          <div className="cardnotes">
+            {entry.note && <p className="note cms">{entry.note}</p>}
+            {entry.mood && (
+              <p className="moodline crs">
+                current mood: <b>{entry.mood}</b>
+              </p>
+            )}
           </div>
         )}
-        <div className="cardmeta">
-          <h2 className="tt">{entry.title}</h2>
-          {entry.artist && <p className="ta">{entry.artist}</p>}
-          <p className="cardrow">
-            <a
-              className="provbtn crs"
-              href={entry.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              ▶ from {entry.provider}
-            </a>
-          </p>
-        </div>
+
+        {authed && <EditPanel entry={entry} />}
       </div>
-      {EMBEDS && entry.embedHtml && (
-        <div
-          className="embed"
-          dangerouslySetInnerHTML={{ __html: entry.embedHtml }}
-        />
-      )}
-      {entry.note && <p className="note cms">{entry.note}</p>}
-      {entry.mood && (
-        <p className="moodline crs">
-          current mood: <b>{entry.mood}</b>
-        </p>
-      )}
     </article>
   );
 }
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ bad?: string }>;
+}) {
+  const params = await searchParams;
+  const authed = await isAdmin();
+
   let journal: Journal = { entries: [] };
   let storeError = false;
   try {
@@ -101,11 +169,7 @@ export default async function Home() {
   return (
     <main className="col">
       <header className="masthead">
-        <h1 className="site-title">
-          <span className="deco">★·.·´¯`·.·★ </span>
-          {TITLE}
-          <span className="deco"> ★·.·´¯`·.·★</span>
-        </h1>
+        <h1 className="site-title">{TITLE}</h1>
         <p className="tagline cms">{TAGLINE}</p>
       </header>
       <nav className="navrow crs">
@@ -135,10 +199,12 @@ export default async function Home() {
       )}
 
       {journal.entries.map((entry, i) => (
-        <div key={entry.id}>
-          {i > 0 && <div className="entrysep" />}
-          <TrackEntry entry={entry} index={i + 1} />
-        </div>
+        <TrackEntry
+          key={entry.id}
+          entry={entry}
+          index={i + 1}
+          authed={authed}
+        />
       ))}
 
       <footer className="counterbox bvi">
@@ -154,6 +220,29 @@ export default async function Home() {
           <a href="/feed.xml">rss</a> · est. 2026 · made with ♥ on{" "}
           <a href="https://vercel.com">vercel</a>
         </p>
+
+        {authed ? (
+          <form action={logout} className="keeperbar crs">
+            <span>♦ keeper mode</span>
+            <button type="submit" className="btn95">
+              log out
+            </button>
+          </form>
+        ) : (
+          <details className="keeper">
+            <summary className="crs">·</summary>
+            {params.bad && <p className="adm-bad crs">wrong password!!</p>}
+            <form action={login} className="keeperlogin">
+              <label className="crs" htmlFor="key">
+                journal secret
+              </label>
+              <input id="key" name="key" type="password" />
+              <button type="submit" className="btn95">
+                let me in
+              </button>
+            </form>
+          </details>
+        )}
       </footer>
     </main>
   );

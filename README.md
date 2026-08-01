@@ -15,8 +15,8 @@ token. The server fishes the URL out of the shared text, asks the platform's
 public oEmbed endpoint (Spotify/SoundCloud/YouTube) for title, art, and embed
 HTML — or falls back to scraping Open Graph tags for everything else — then
 appends the entry to `tracks.json` in Vercel Blob. The page is rendered on
-demand, so new tracks show up immediately. `/admin` (gated by the same secret)
-lets you edit notes, moods, titles, and artists, or delete entries.
+demand, so new tracks show up immediately. Editing happens in place on the
+front page once you're signed in — there is no separate admin route.
 
 ## Deploy
 
@@ -74,12 +74,17 @@ curl -X POST https://YOUR-APP.vercel.app/api/add \
 
 ## Editing entries
 
-Visit `/admin` and enter your `JOURNAL_SECRET` once. The session lasts a year;
-the cookie holds a hash derived from the secret rather than the secret itself,
-so your password isn't sitting in the browser or replayed on every request.
-Once in, you can rewrite notes and moods, fix titles or artists
-(Spotify's oEmbed doesn't return artist names, so you may want to fill those
-in), or delete entries. Deletes are immediate and there's no undo — it's a
+Open the `·` at the very bottom of the front page and enter your
+`JOURNAL_SECRET` once. The session lasts a year; the cookie holds a hash
+derived from the secret rather than the secret itself, so your password isn't
+sitting in the browser or replayed on every request.
+
+Once you're in, every track grows an `✎ edit` disclosure holding its title,
+artist, note and mood, plus a delete button. Logged-out visitors never receive
+that markup, and each action re-checks the cookie on the server, so hiding the
+controls is presentation only rather than the actual gate. You can fix titles
+or artists (Spotify's oEmbed doesn't return artist names, so you may want to
+fill those in), or delete entries. Deletes are immediate and there's no undo — it's a
 journal, not a database.
 
 ## Local development

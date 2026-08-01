@@ -8,9 +8,9 @@ import { readJournal, writeJournal } from "@/lib/store";
 
 export async function login(formData: FormData) {
   const key = String(formData.get("key") ?? "");
-  if (!secretMatches(key)) redirect("/admin?bad=1");
+  if (!secretMatches(key)) redirect("/?bad=1");
   const token = sessionToken();
-  if (!token) redirect("/admin?bad=1");
+  if (!token) redirect("/?bad=1");
   const jar = await cookies();
   jar.set(COOKIE_NAME, token, {
     httpOnly: true,
@@ -19,17 +19,20 @@ export async function login(formData: FormData) {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
   });
-  redirect("/admin");
+  redirect("/");
 }
 
 export async function logout() {
   const jar = await cookies();
   jar.delete(COOKIE_NAME);
-  redirect("/admin");
+  redirect("/");
 }
 
+// Every mutating action re-checks the cookie server-side. The edit controls
+// being hidden from logged-out visitors is presentation only; this is the
+// actual gate, and it runs even if someone posts to the action directly.
 export async function saveEntry(formData: FormData) {
-  if (!(await isAdmin())) redirect("/admin");
+  if (!(await isAdmin())) redirect("/");
   const id = String(formData.get("id") ?? "");
   const journal = await readJournal();
   const entry = journal.entries.find((e) => e.id === id);
@@ -45,11 +48,10 @@ export async function saveEntry(formData: FormData) {
     await writeJournal(journal);
   }
   revalidatePath("/");
-  revalidatePath("/admin");
 }
 
 export async function deleteEntry(formData: FormData) {
-  if (!(await isAdmin())) redirect("/admin");
+  if (!(await isAdmin())) redirect("/");
   const id = String(formData.get("id") ?? "");
   const journal = await readJournal();
   const remaining = journal.entries.filter((e) => e.id !== id);
@@ -57,5 +59,4 @@ export async function deleteEntry(formData: FormData) {
     await writeJournal({ entries: remaining });
   }
   revalidatePath("/");
-  revalidatePath("/admin");
 }
