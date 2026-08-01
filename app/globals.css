@@ -333,7 +333,7 @@ summary:focus-visible {
 /* Track number on the left; permalink and edit toggle pushed to the right.
    Wraps so the edit form can claim a full-width line of its own below. */
 .numline {
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   font-size: 12px;
   display: flex;
   align-items: baseline;
@@ -390,17 +390,48 @@ summary:focus-visible {
   overflow-wrap: anywhere;
 }
 
-.cardrow {
-  margin: 9px 0 0;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+/* Compact siblings of the main beveled button, sized to sit beside text */
+.minibtn {
+  display: inline-block;
+  font-family: var(--mono);
+  background: linear-gradient(
+    180deg,
+    var(--btn-hi) 0%,
+    var(--btn) 55%,
+    #a9aebe 100%
+  );
+  border: 1px solid;
+  border-color: #ffffff var(--btn-sh) var(--btn-sh) #ffffff;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 0.4px;
+  color: var(--btn-ink);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.minibtn:visited {
+  color: var(--btn-ink);
+}
+
+.minibtn:hover {
+  background: linear-gradient(
+    180deg,
+    #ffd9a0 0%,
+    var(--amber) 60%,
+    #e07f14 100%
+  );
+  color: var(--btn-ink);
+}
+
+.minibtn:active {
+  border-color: var(--btn-sh) #ffffff #ffffff var(--btn-sh);
+  transform: translate(1px, 1px);
 }
 
 /* Silver beveled control with dark ink, as on a classic transport bar */
-.provbtn,
 .btn95 {
   display: inline-block;
   font-family: var(--mono);
@@ -416,17 +447,11 @@ summary:focus-visible {
   cursor: pointer;
 }
 
-.provbtn:visited {
-  color: var(--btn-ink);
-}
-
-.provbtn:hover,
 .btn95:hover {
   background: linear-gradient(180deg, #ffd9a0 0%, var(--amber) 60%, #e07f14 100%);
   color: var(--btn-ink);
 }
 
-.provbtn:active,
 .btn95:active {
   border-color: var(--btn-sh) #ffffff #ffffff var(--btn-sh);
   transform: translate(1px, 1px);
@@ -438,13 +463,12 @@ summary:focus-visible {
 
 /* ---------- player ---------- */
 
-/* The listen toggle sits inline with the "from <provider>" button; when
-   opened, the player claims a full-width line beneath both of them by
-   wrapping within .cardrow. The iframe is only mounted once expanded, so the
-   provider is not contacted until then. */
+/* The listen toggle is a tiny control on the artist line; the player itself
+   renders here, at the foot of the card, so it gets the full card width rather
+   than the narrow metadata column. The iframe is only mounted once expanded,
+   so the provider is not contacted until then. */
 .embed {
-  flex: 0 0 100%;
-  margin-top: 2px;
+  margin-top: 10px;
 }
 
 .embed iframe {
@@ -453,9 +477,11 @@ summary:focus-visible {
   border: 0;
 }
 
-/* Dimension + note as one LCD readout, matching the marquee up top. */
+/* Dimension + note as one LCD readout, matching the marquee up top. Lives in
+   the metadata column beside the artwork, under the title and artist and
+   above the button row. */
 .trackline {
-  margin-top: 10px;
+  margin-top: 8px;
   padding: 5px 0;
   background: var(--well);
   background-image: repeating-linear-gradient(
@@ -699,6 +725,18 @@ textarea {
 }
 
 @media (max-width: 480px) {
+  /* The number line carries two controls plus the permalink; without this a
+     longer provider name pushes the permalink onto a line of its own. */
+  .minibtn {
+    font-size: 9px;
+    padding: 1px 5px;
+    letter-spacing: 0;
+  }
+
+  .numline {
+    gap: 5px;
+  }
+
   .site-title {
     font-size: 18px;
     letter-spacing: 1px;

@@ -15,8 +15,16 @@ export type Entry = {
 
 export type Journal = { entries: Entry[] };
 
-const TRACKS_PATH = "tracklog/tracks.json";
-const HITS_PATH = "tracklog/hits.txt";
+// Local development and production share one Blob store, because they share
+// one BLOB_READ_WRITE_TOKEN. Without separate keys, anything written while
+// testing locally lands in the real journal — and since writes are
+// read-modify-write on a single file, that means real logged tracks can be
+// overwritten by a throwaway test entry. Dev therefore gets its own keys and
+// can never touch the live data.
+const DEV = process.env.NODE_ENV !== "production";
+
+const TRACKS_PATH = DEV ? "tracklog/tracks.dev.json" : "tracklog/tracks.json";
+const HITS_PATH = DEV ? "tracklog/hits.dev.txt" : "tracklog/hits.txt";
 
 // Public blob URLs sit behind Vercel's CDN, and the cache key ignores the
 // query string — a `?v=` buster does nothing, so a read could return content

@@ -1,12 +1,14 @@
 # trackl0g
 
 A single-page public music journal wearing the visual language of a late-90s
-skinnable desktop media player: navy panels with hard bevels, gold-barred title
-bars, silver buttons with dark ink, black LCD wells in phosphor green, amber
-accents. Share a track from Spotify, SoundCloud, YouTube, Bandcamp or Apple
+skinnable desktop media player: charcoal blue-grey panels with hard bevels,
+gold-barred title bars, silver buttons with dark ink, black playlist wells in
+phosphor green, amber accents, and a hard blue selection row on the newest
+track. Share a track from Spotify, SoundCloud, YouTube, Bandcamp or Apple
 Music straight from your phone's share sheet, add a note and a dimension, and
-it appears on your site seconds later — artwork, title, artist, an inline
-player, a real hit counter, an RSS feed.
+it appears on your site seconds later — artwork, title, artist, a collapsible
+inline player, a scrolling LCD readout carrying the dimension and note, a real
+hit counter, an RSS feed.
 
 None of the *functional* chrome is reproduced — no equaliser, transport bar or
 visualiser — because the page doesn't play anything itself and those controls
@@ -122,14 +124,15 @@ password. The bearer token on `/api/add` still uses the raw secret, so the
 shortcut is unaffected, and the hashed cookie value is deliberately *not*
 accepted as a bearer.
 
-Signed in, every track grows an `✎ edit` disclosure with title, artist, note
-and dimension, plus a delete button. Logged-out visitors never receive that
+Signed in, every track grows a small `✎` beside its permalink, opening a panel
+with artist, note, dimension and title, plus a delete button. Saving closes the
+panel. Logged-out visitors never receive that
 markup, and every mutating action re-checks the cookie on the server — hiding
 the controls is presentation, not the security boundary.
 
 ## Players
 
-Tracks play inline. Hit `♪ play here` and an embed opens for Spotify,
+Tracks play inline. Hit `♪ listen` and an embed opens for Spotify,
 SoundCloud, YouTube or Apple Music.
 
 There is **no OAuth and no client ID**. SoundCloud plays in full for free;
@@ -146,7 +149,7 @@ Players start collapsed and the iframe is **mounted on demand**, so Spotify and
 SoundCloud aren't contacted at all until someone chooses to play something. A
 closed `<details>` does *not* achieve this — the browser loads the iframe
 anyway, even with `loading="lazy"` — which is why the toggle is a small client
-component. It needs JavaScript; without it the `▶ from <provider>` link beside
+component. It needs JavaScript; without it the `▶ open <provider>` link beside
 it still works.
 
 ## Local development
@@ -157,6 +160,13 @@ vercel link
 vercel env pull .env.local
 npm run dev
 ```
+
+Local dev reads and writes **`tracklog/tracks.dev.json`**, a separate key from
+the live `tracklog/tracks.json`. Dev and production share one Blob store
+because they share one token, and writes are read-modify-write on a single
+file, so without separate keys a throwaway test entry made locally would
+overwrite real logged tracks. Local dev therefore shows its own fixture data,
+not the live journal — that is deliberate.
 
 **Stop the dev server before `npm run build`.** Both write to `.next/`, so a
 production build pulls the dev server's assets out from under it and the page

@@ -3,22 +3,23 @@ import { embedFor } from "@/lib/embed";
 import { bumpHits, readJournal, type Entry, type Journal } from "@/lib/store";
 import { deleteEntry, login, logout, saveEntry } from "./actions";
 import { EditForm, EditProvider, EditToggle } from "./edit-panel";
-import { Player } from "./player";
+import { PlayerEmbed, PlayerProvider, PlayerToggle } from "./player";
 
 export const dynamic = "force-dynamic";
 
-const TITLE = process.env.NEXT_PUBLIC_SITE_TITLE || "trackl0g";
+const TITLE = process.env.NEXT_PUBLIC_SITE_TITLE || "trackl0g by ilygoose";
 const TAGLINE =
   process.env.NEXT_PUBLIC_SITE_TAGLINE || "songs that alter my brain chemistry";
 const ABOUT = process.env.NEXT_PUBLIC_ABOUT || "";
 
 // Collapsed by default: the players are tall, and a page of them would bury
-// the notes. The toggle lives in a client component so the iframe is only
-// mounted once asked for — see app/player.tsx for why.
-function TrackPlayer({ entry }: { entry: Entry }) {
+// the tracks. The iframe is only mounted once asked for — see app/player.tsx.
+function TrackPlayerEmbed({ entry }: { entry: Entry }) {
   const embed = embedFor(entry);
   if (!embed) return null;
-  return <Player src={embed.src} height={embed.height} title={embed.title} />;
+  return (
+    <PlayerEmbed src={embed.src} height={embed.height} title={embed.title} />
+  );
 }
 
 // Dimension and note collapse into a single LCD line, styled like the
@@ -34,7 +35,7 @@ function TrackLine({ entry }: { entry: Entry }) {
   if (!parts.length) return null;
 
   const text = parts.join("  \u00b7\u00b7\u00b7  ");
-  const scrolls = text.length > 38;
+  const scrolls = text.length > 30;
 
   return (
     <div className="trackline crs" title={text}>
@@ -66,68 +67,67 @@ function TrackEntry({
   return (
     <article className="entry" id={entry.id}>
       <EditProvider>
-        <div className={current ? "card bvi current" : "card bvi"}>
-          <div className="cardtop">
-            {entry.art ? (
-              <img
-                className="art"
-                src={entry.art}
-                alt={`artwork for ${entry.title}`}
-                width={84}
-                height={84}
-                loading="lazy"
-              />
-            ) : (
-              <div className="art artfallback" aria-hidden="true">
-                <span />
-              </div>
-            )}
-            <div className="cardmeta">
-              {/* Permalink sits before the edit toggle so that, when the form
+        <PlayerProvider>
+          <div className={current ? "card bvi current" : "card bvi"}>
+            <div className="cardtop">
+              {entry.art ? (
+                <img
+                  className="art"
+                  src={entry.art}
+                  alt={`artwork for ${entry.title}`}
+                  width={84}
+                  height={84}
+                  loading="lazy"
+                />
+              ) : (
+                <div className="art artfallback" aria-hidden="true">
+                  <span />
+                </div>
+              )}
+              <div className="cardmeta">
+                {/* Permalink sits before the edit toggle so that, when the form
                 opens, it wraps onto its own full-width line without stranding
                 the permalink below it. */}
-              <div className="numline crs">
-                <span className="tracknum">
-                  {String(index).padStart(2, "0")}.
-                </span>
-                <a
-                  className="permalink"
-                  href={`#${entry.id}`}
-                  aria-label="permalink"
-                >
-                  #
-                </a>
-                {authed && <EditToggle />}
+                <div className="numline crs">
+                  <span className="tracknum">
+                    {String(index).padStart(2, "0")}.
+                  </span>
+                  <a
+                    className="minibtn crs"
+                    href={entry.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    ▶ open {entry.provider}
+                  </a>
+                  {embedFor(entry) && <PlayerToggle />}
+                  <a
+                    className="permalink"
+                    href={`#${entry.id}`}
+                    aria-label="permalink"
+                  >
+                    #
+                  </a>
+                  {authed && <EditToggle />}
+                </div>
+                <h2 className="tt">{entry.title}</h2>
+                {entry.artist && <p className="ta">{entry.artist}</p>}
+                <TrackLine entry={entry} />
               </div>
-              <h2 className="tt">{entry.title}</h2>
-              {entry.artist && <p className="ta">{entry.artist}</p>}
             </div>
+
+            {/* Full card width, rather than the narrow metadata column */}
+            <TrackPlayerEmbed entry={entry} />
+
+            {authed && (
+              <EditForm
+                entry={entry}
+                saveAction={saveEntry}
+                deleteAction={deleteEntry}
+              />
+            )}
           </div>
-
-          {/* Both controls share a row; the expanded player takes a full-width
-            line beneath them by wrapping within this flex container. */}
-          <div className="cardrow">
-            <a
-              className="provbtn crs"
-              href={entry.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              ▶ from {entry.provider}
-            </a>
-            <TrackPlayer entry={entry} />
-          </div>
-
-          <TrackLine entry={entry} />
-
-          {authed && (
-            <EditForm
-              entry={entry}
-              saveAction={saveEntry}
-              deleteAction={deleteEntry}
-            />
-          )}
-        </div>
+        </PlayerProvider>
       </EditProvider>
     </article>
   );
