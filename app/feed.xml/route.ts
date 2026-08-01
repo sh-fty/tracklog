@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   const title = process.env.NEXT_PUBLIC_SITE_TITLE || "trackl0g";
   const tagline =
     process.env.NEXT_PUBLIC_SITE_TAGLINE ||
-    "a public log of songs that altered my brain chemistry";
+    "songs that alter my brain chemistry";
 
   const items = journal.entries
     .slice(0, 50)

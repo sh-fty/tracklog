@@ -34,6 +34,7 @@ export async function logout() {
 export async function saveEntry(formData: FormData) {
   if (!(await isAdmin())) redirect("/");
   const id = String(formData.get("id") ?? "");
+  // A failed read must not become a write — see readJournal in lib/store.
   const journal = await readJournal();
   const entry = journal.entries.find((e) => e.id === id);
   if (entry) {
@@ -53,6 +54,7 @@ export async function saveEntry(formData: FormData) {
 export async function deleteEntry(formData: FormData) {
   if (!(await isAdmin())) redirect("/");
   const id = String(formData.get("id") ?? "");
+  // A failed read must not become a write — see readJournal in lib/store.
   const journal = await readJournal();
   const remaining = journal.entries.filter((e) => e.id !== id);
   if (remaining.length !== journal.entries.length) {

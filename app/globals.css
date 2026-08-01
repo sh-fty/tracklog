@@ -1,29 +1,45 @@
-@import url("https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,400;0,700;1,400&display=swap");
-
 /* Design language borrowed from late-90s skinnable desktop media players:
-   steel-blue panels with hard 1px bevels, gradient title bars, and black
-   playlist wells in phosphor green. Nothing is copied from any player —
-   it's all CSS gradients and borders — and none of the functional chrome
-   (equalizer, transport, visualiser) is reproduced, since this page can't
-   play anything itself and those controls would misstate what it does. */
+   navy panels with hard 1px bevels, gold-barred title bars, silver beveled
+   buttons with dark ink, black LCD wells in phosphor green, and amber
+   accents. Nothing is copied from any player — it's all CSS gradients and
+   borders — and none of the functional chrome (equaliser, transport,
+   visualiser) is reproduced, since this page can't play anything itself and
+   those controls would misstate what it does. */
 :root {
-  --desk: #0a0d16;
-  --face: #45557d;
-  --face-lo: #354263;
-  --face-hi: #55689a;
-  --lt: #9aabd6;
-  --dk: #0d1220;
-  --title-a: #7183bb;
-  --title-b: #2b3557;
-  --well: #05080f;
-  --well-hi: #0c1320;
-  --lcd: #00f000;
-  --lcd-dim: #00a000;
-  --txt: #f0f4ff;
-  --muted: #c0cdf0;
+  --desk: #171a2e;
+  --face: #3f4468;
+  --face-lo: #2f3352;
+  --face-hi: #565c8a;
+  --lt: #8f96c4;
+  --dk: #10121f;
+
+  --title-a: #4d5488;
+  --title-b: #222840;
+  --gold: #d9c98d;
+  --gold-dk: #8b7c47;
+
+  /* Silver button face with dark ink, as on a classic transport bar */
+  --btn: #c6cad6;
+  --btn-hi: #f2f4fa;
+  --btn-sh: #6e7288;
+  --btn-ink: #14162a;
+
+  --well: #000000;
+  --lcd: #14ff14;
+  --lcd-dim: #0a9e0a;
+  --amber: #ffa02c;
+
+  --txt: #eceffc;
+  --muted: #aab2df;
   --hot: #ff5ca8;
   --linkblue: #9fc3ff;
   --linkvisited: #d8b0ff;
+
+  /* System mono renders far cleaner on iOS than Courier New, which comes out
+     thin and serif-ish there. No webfont, so nothing is fetched off-origin. */
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+  --ui: Tahoma, Verdana, Geneva, sans-serif;
 }
 
 * {
@@ -46,24 +62,20 @@ body {
   padding: 28px 10px 64px;
   background-color: var(--desk);
   background-image:
-    radial-gradient(circle, rgba(255, 255, 255, 0.45) 1px, transparent 1.7px),
-    radial-gradient(circle, rgba(120, 150, 235, 0.4) 1px, transparent 1.7px);
+    radial-gradient(circle, rgba(255, 255, 255, 0.4) 1px, transparent 1.7px),
+    radial-gradient(circle, rgba(120, 150, 235, 0.35) 1px, transparent 1.7px);
   background-size:
     170px 170px,
     95px 95px;
   background-position:
     0 0,
     45px 60px;
-  font-family: Verdana, Geneva, sans-serif;
+  font-family: var(--ui);
   color: var(--txt);
 }
 
 .crs {
-  font-family: "Courier New", Courier, monospace;
-}
-
-.cms {
-  font-family: "Comic Sans MS", "Comic Neue", cursive;
+  font-family: var(--mono);
 }
 
 a {
@@ -75,8 +87,8 @@ a:visited {
 }
 
 a:hover {
-  background: var(--hot);
-  color: #0a0d16;
+  background: var(--amber);
+  color: var(--btn-ink);
 }
 
 a:focus-visible,
@@ -84,13 +96,13 @@ button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 summary:focus-visible {
-  outline: 2px solid var(--lcd);
+  outline: 2px solid var(--amber);
   outline-offset: 1px;
 }
 
 ::selection {
   background: var(--lcd);
-  color: #05080f;
+  color: #000;
 }
 
 .bv {
@@ -111,28 +123,28 @@ summary:focus-visible {
   background: var(--face);
   border: 2px solid;
   border-color: var(--lt) var(--dk) var(--dk) var(--lt);
-  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.75);
 }
 
 .masthead {
   background: linear-gradient(
     180deg,
     var(--title-a) 0%,
-    var(--title-b) 68%,
-    #1e2745 100%
+    var(--title-b) 70%,
+    #1a1f36 100%
   );
   border-bottom: 2px solid var(--dk);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
   text-align: center;
-  padding: 10px 12px 9px;
+  padding: 9px 10px 8px;
 }
 
 .site-title {
   margin: 0;
-  font-family: "Courier New", Courier, monospace;
+  font-family: var(--mono);
   font-weight: bold;
-  font-size: 21px;
-  letter-spacing: 3px;
+  font-size: 19px;
+  letter-spacing: 4px;
   text-transform: uppercase;
   color: #ffffff;
   text-shadow: 0 1px 0 #000;
@@ -143,23 +155,26 @@ summary:focus-visible {
   gap: 10px;
 }
 
-/* Grip lines flanking the title, as on a classic player's title bar */
+/* The stacked gold bars that flank the title on a classic player window */
 .site-title::before,
 .site-title::after {
   content: "";
   flex: 1;
-  height: 9px;
+  height: 11px;
+  min-width: 18px;
   background: repeating-linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.45) 0 1px,
-    transparent 1px 3px
+    var(--gold) 0 1px,
+    var(--gold-dk) 1px 2px,
+    transparent 2px 4px
   );
 }
 
 .tagline {
   margin: 6px 0 0;
-  font-size: 12px;
-  color: #e2e9ff;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #d5dcff;
 }
 
 .navrow {
@@ -167,7 +182,7 @@ summary:focus-visible {
   border-bottom: 2px solid var(--dk);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
   text-align: center;
-  padding: 7px 8px;
+  padding: 6px 8px;
   font-size: 12px;
 }
 
@@ -177,17 +192,25 @@ summary:focus-visible {
 
 /* ---------- LCD ---------- */
 
+/* Faint horizontal scanlines over the phosphor, as on a backlit LCD */
 .marquee {
+  position: relative;
   background: var(--well);
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.045) 0 1px,
+    transparent 1px 3px
+  );
   color: var(--lcd);
   font-size: 13px;
-  padding: 7px 0;
+  letter-spacing: 1px;
+  padding: 8px 0;
   margin: 8px;
   overflow: hidden;
   white-space: nowrap;
   border: 2px solid;
   border-color: var(--dk) var(--lt) var(--lt) var(--dk);
-  text-shadow: 0 0 7px rgba(0, 240, 0, 0.6);
+  text-shadow: 0 0 7px rgba(20, 255, 20, 0.65);
 }
 
 .marquee span {
@@ -213,8 +236,8 @@ summary:focus-visible {
   margin: 8px;
   padding: 10px 12px;
   background: #4a3a12;
-  border: 2px solid #d6a422;
-  color: #ffe08a;
+  border: 2px solid var(--amber);
+  color: #ffe0a8;
   font-size: 12px;
 }
 
@@ -232,9 +255,14 @@ summary:focus-visible {
 }
 
 /* One black playlist well per track. Everything about the song — art,
-   title, player, note and mood — lives inside this box. */
+   title, player, note and dimension — lives inside this box. */
 .card {
   background: var(--well);
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.028) 0 1px,
+    transparent 1px 3px
+  );
   padding: 10px;
 }
 
@@ -251,7 +279,7 @@ summary:focus-visible {
   border: 2px solid;
   border-color: var(--dk) var(--lt) var(--lt) var(--dk);
   flex-shrink: 0;
-  background: #0b1b12;
+  background: #08130c;
 }
 
 .artfallback {
@@ -284,7 +312,7 @@ summary:focus-visible {
 }
 
 .numline {
-  margin: 0 0 3px;
+  margin: 0 0 4px;
   font-size: 12px;
   display: flex;
   align-items: baseline;
@@ -292,37 +320,40 @@ summary:focus-visible {
 }
 
 .tracknum {
-  color: var(--lcd);
+  color: var(--amber);
   font-weight: bold;
+  letter-spacing: 1px;
 }
 
 .permalink {
   margin-left: auto;
   text-decoration: none;
-  color: #7f8db5;
+  color: #6f77a0;
   padding: 0 4px;
 }
 
 .permalink:hover {
-  background: var(--hot);
-  color: #05080f;
+  background: var(--amber);
+  color: var(--btn-ink);
 }
 
 .tt {
   margin: 0;
-  font-family: "Courier New", Courier, monospace;
-  font-size: 16px;
+  font-family: var(--mono);
+  font-size: 15px;
   font-weight: bold;
+  letter-spacing: 0.3px;
   color: var(--txt);
   overflow-wrap: anywhere;
 }
 
 .ta {
-  margin: 3px 0 0;
-  font-family: "Courier New", Courier, monospace;
+  margin: 4px 0 0;
+  font-family: var(--mono);
   font-size: 13px;
   color: var(--lcd);
   overflow-wrap: anywhere;
+  text-shadow: 0 0 6px rgba(20, 255, 20, 0.4);
 }
 
 .cardrow {
@@ -330,46 +361,53 @@ summary:focus-visible {
   font-size: 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
-.provbtn {
+/* Silver beveled control with dark ink, as on a classic transport bar */
+.provbtn,
+.btn95 {
   display: inline-block;
-  background: linear-gradient(180deg, var(--face-hi), var(--face-lo));
+  font-family: var(--mono);
+  background: linear-gradient(180deg, var(--btn-hi) 0%, var(--btn) 55%, #a9aebe 100%);
   border: 2px solid;
-  border-color: var(--lt) var(--dk) var(--dk) var(--lt);
+  border-color: #ffffff var(--btn-sh) var(--btn-sh) #ffffff;
   padding: 5px 12px;
   font-size: 12px;
-  color: var(--txt);
-  text-decoration: none;
+  font-weight: bold;
   letter-spacing: 0.5px;
+  color: var(--btn-ink);
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .provbtn:visited {
-  color: var(--txt);
+  color: var(--btn-ink);
 }
 
-.provbtn:hover {
-  background: var(--hot);
-  color: #05080f;
+.provbtn:hover,
+.btn95:hover {
+  background: linear-gradient(180deg, #ffd9a0 0%, var(--amber) 60%, #e07f14 100%);
+  color: var(--btn-ink);
 }
 
-.provbtn:active {
-  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
+.provbtn:active,
+.btn95:active {
+  border-color: var(--btn-sh) #ffffff #ffffff var(--btn-sh);
   transform: translate(1px, 1px);
 }
 
-/* Collapsed player. The toggle is a real button styled like the other
-   beveled ones; the iframe is only mounted once expanded, so the provider is
-   not contacted until then. The caret is rendered in the markup rather than
-   via ::after, so it flips with component state. */
-.player {
-  margin-top: 10px;
+.btn95.danger {
+  color: #8c0000;
 }
 
-.player > button {
-  cursor: pointer;
+/* ---------- player ---------- */
+
+/* The toggle is a real button; the iframe is only mounted once expanded, so
+   the provider is not contacted until then. */
+.player {
+  margin-top: 10px;
 }
 
 .embed {
@@ -382,30 +420,31 @@ summary:focus-visible {
   border: 0;
 }
 
-/* Note and mood now sit inside the track box, under a divider. */
+/* Note and dimension sit inside the track box, under a divider. */
 .cardnotes {
   margin-top: 10px;
   padding-top: 9px;
-  border-top: 1px solid #23304a;
+  border-top: 1px solid #1e2740;
 }
 
 .note {
   margin: 0;
-  font-size: 15px;
+  font-family: var(--ui);
+  font-size: 14px;
   line-height: 1.6;
-  color: #ccffcc;
+  color: #d6f5d6;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
 
 .moodline {
-  margin: 7px 0 0;
+  margin: 8px 0 0;
   font-size: 12px;
   color: var(--muted);
 }
 
 .moodline b {
-  color: var(--lcd);
+  color: var(--amber);
 }
 
 /* ---------- keeper-only editing ---------- */
@@ -414,7 +453,7 @@ summary:focus-visible {
    logged-out visitor never receives this markup at all. */
 .edit {
   margin-top: 10px;
-  border-top: 1px solid #23304a;
+  border-top: 1px solid #1e2740;
   padding-top: 8px;
 }
 
@@ -430,7 +469,7 @@ summary:focus-visible {
 }
 
 .edit summary:hover {
-  color: var(--lcd);
+  color: var(--amber);
 }
 
 .editform {
@@ -441,11 +480,11 @@ summary:focus-visible {
 }
 
 .editform label {
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: #8fa0c8;
-  margin-top: 5px;
+  color: #8b93c0;
+  margin-top: 6px;
 }
 
 .editactions {
@@ -464,40 +503,20 @@ button {
 input[type="password"],
 input[type="text"],
 textarea {
-  font-family: "Courier New", Courier, monospace;
+  font-family: var(--mono);
   padding: 6px 8px;
   border: 2px solid;
   border-color: var(--dk) var(--lt) var(--lt) var(--dk);
-  background: var(--well-hi);
+  background: #060a12;
   color: var(--lcd);
   width: 100%;
 }
 
 textarea {
-  font-family: "Comic Sans MS", "Comic Neue", cursive;
+  font-family: var(--ui);
   min-height: 70px;
   resize: vertical;
-  color: #ccffcc;
-}
-
-.btn95 {
-  font-family: "Courier New", Courier, monospace;
-  background: linear-gradient(180deg, var(--face-hi), var(--face-lo));
-  border: 2px solid;
-  border-color: var(--lt) var(--dk) var(--dk) var(--lt);
-  padding: 5px 14px;
-  cursor: pointer;
-  color: var(--txt);
-  letter-spacing: 0.5px;
-}
-
-.btn95:active {
-  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
-  transform: translate(1px, 1px);
-}
-
-.btn95.danger {
-  color: #ff9d9d;
+  color: #d6f5d6;
 }
 
 .adm-bad {
@@ -519,8 +538,8 @@ textarea {
 
 .clabel {
   margin: 0 0 8px;
-  font-size: 11px;
-  letter-spacing: 1px;
+  font-size: 10px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -533,18 +552,18 @@ textarea {
   display: inline-block;
   background: var(--well);
   color: var(--lcd);
-  font-family: "Courier New", Courier, monospace;
+  font-family: var(--mono);
   font-size: 17px;
   font-weight: bold;
   padding: 3px 7px;
   border: 1px solid #000;
   margin: 0 1px;
-  text-shadow: 0 0 7px rgba(0, 240, 0, 0.65);
+  text-shadow: 0 0 7px rgba(20, 255, 20, 0.7);
 }
 
 .footlinks {
   margin: 10px 0 0;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--muted);
 }
 
@@ -556,7 +575,7 @@ textarea {
 
 .keeper summary {
   cursor: pointer;
-  color: #7f8db5;
+  color: #6f77a0;
   font-size: 13px;
   list-style: none;
 }
@@ -574,7 +593,7 @@ textarea {
 }
 
 .keeperlogin label {
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--muted);
@@ -587,7 +606,7 @@ textarea {
   justify-content: center;
   gap: 12px;
   font-size: 12px;
-  color: var(--lcd);
+  color: var(--amber);
 }
 
 /* ---------- mobile ---------- */
@@ -622,17 +641,13 @@ textarea {
 
 @media (max-width: 480px) {
   .site-title {
-    font-size: 17px;
-    letter-spacing: 2px;
+    font-size: 16px;
+    letter-spacing: 3px;
   }
 
   .art {
-    width: 64px;
-    height: 64px;
-  }
-
-  .tt {
-    font-size: 15px;
+    width: 68px;
+    height: 68px;
   }
 }
 

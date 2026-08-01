@@ -24,23 +24,32 @@ const HITS_PATH = "tracklog/hits.txt";
 // size. Freshness therefore has to come from the write side, via
 // cacheControlMaxAge below. The no-store fetch keeps the runtime's own fetch
 // cache out of it as well.
+// Returns null only when the blob genuinely does not exist yet (a brand new
+// store). Anything else — a failed fetch, a bad status — throws, so callers
+// can tell "there is nothing here" apart from "I could not find out".
 async function readBlobText(prefix: string): Promise<string | null> {
   const { blobs } = await list({ prefix, limit: 1 });
   if (!blobs.length) return null;
   const res = await fetch(blobs[0].url, { cache: "no-store" });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    throw new Error(`blob read failed for ${prefix}: HTTP ${res.status}`);
+  }
   return res.text();
 }
 
+// Throws when the journal cannot be read or parsed, and that matters: this is
+// a read-modify-write store, so any caller that treats a failed read as "the
+// journal is empty" and then writes would permanently destroy every existing
+// entry. Display callers catch this and show a warning; mutating callers must
+// let it propagate so the write is abandoned instead.
 export async function readJournal(): Promise<Journal> {
   const text = await readBlobText(TRACKS_PATH);
-  if (!text) return { entries: [] };
-  try {
-    const parsed = JSON.parse(text) as Journal;
-    return { entries: Array.isArray(parsed.entries) ? parsed.entries : [] };
-  } catch {
-    return { entries: [] };
+  if (text === null) return { entries: [] };
+  const parsed = JSON.parse(text) as Journal;
+  if (!Array.isArray(parsed?.entries)) {
+    throw new Error("journal blob is not in the expected shape");
   }
+  return { entries: parsed.entries };
 }
 
 export async function writeJournal(journal: Journal): Promise<void> {

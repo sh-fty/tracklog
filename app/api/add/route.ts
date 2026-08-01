@@ -48,7 +48,18 @@ export async function POST(req: Request) {
     ...meta,
   };
 
-  const journal = await readJournal();
+  // If the existing journal can't be read, abandon the write. Appending to an
+  // assumed-empty journal would overwrite every entry already stored.
+  let journal;
+  try {
+    journal = await readJournal();
+  } catch {
+    return NextResponse.json(
+      { ok: false, error: "could not read the journal; nothing was saved" },
+      { status: 503 },
+    );
+  }
+
   journal.entries.unshift(entry);
   await writeJournal(journal);
 

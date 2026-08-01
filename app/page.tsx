@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 const TITLE = process.env.NEXT_PUBLIC_SITE_TITLE || "trackl0g";
 const TAGLINE =
   process.env.NEXT_PUBLIC_SITE_TAGLINE ||
-  "a public log of songs that altered my brain chemistry";
+  "songs that alter my brain chemistry";
 const ABOUT = process.env.NEXT_PUBLIC_ABOUT || "";
 
 // Collapsed by default: the players are tall, and a page of them would bury
@@ -50,7 +50,7 @@ function EditPanel({ entry }: { entry: Entry }) {
           defaultValue={entry.note ?? ""}
         />
         <label className="crs" htmlFor={`m-${entry.id}`}>
-          mood
+          dimension
         </label>
         <input id={`m-${entry.id}`} name="mood" defaultValue={entry.mood ?? ""} />
         <div className="editactions">
@@ -123,10 +123,10 @@ function TrackEntry({
 
         {(entry.note || entry.mood) && (
           <div className="cardnotes">
-            {entry.note && <p className="note cms">{entry.note}</p>}
+            {entry.note && <p className="note">{entry.note}</p>}
             {entry.mood && (
               <p className="moodline crs">
-                current mood: <b>{entry.mood}</b>
+                currently in <b>{entry.mood}</b> dimension
               </p>
             )}
           </div>
@@ -165,7 +165,7 @@ export default async function Home({
     <main className="col">
       <header className="masthead">
         <h1 className="site-title">{TITLE}</h1>
-        <p className="tagline cms">{TAGLINE}</p>
+        <p className="tagline">{TAGLINE}</p>
       </header>
       <nav className="navrow crs">
         [ <a href="/">home</a> ] [ <a href="/feed.xml">rss</a> ]
@@ -176,7 +176,7 @@ export default async function Home({
         </span>
       </div>
 
-      {ABOUT && <div className="about bv cms">{ABOUT}</div>}
+      {ABOUT && <div className="about bv">{ABOUT}</div>}
 
       {storeError && (
         <div className="setupwarn crs">
@@ -186,7 +186,7 @@ export default async function Home({
       )}
 
       {journal.entries.length === 0 && !storeError && (
-        <p className="nothing cms">
+        <p className="nothing">
           nothing logged yet... the silence is deafening.
           <br />
           share a track from your phone to begin the journal.
