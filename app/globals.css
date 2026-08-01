@@ -360,6 +360,18 @@ summary:focus-visible {
   transform: translate(1px, 1px);
 }
 
+/* Collapsed player. The toggle is a real button styled like the other
+   beveled ones; the iframe is only mounted once expanded, so the provider is
+   not contacted until then. The caret is rendered in the markup rather than
+   via ::after, so it flips with component state. */
+.player {
+  margin-top: 10px;
+}
+
+.player > button {
+  cursor: pointer;
+}
+
 .embed {
   margin-top: 10px;
 }

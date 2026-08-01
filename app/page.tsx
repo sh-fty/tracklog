@@ -2,6 +2,7 @@ import { isAdmin } from "@/lib/auth";
 import { embedFor } from "@/lib/embed";
 import { bumpHits, readJournal, type Entry, type Journal } from "@/lib/store";
 import { deleteEntry, login, logout, saveEntry } from "./actions";
+import { Player } from "./player";
 
 export const dynamic = "force-dynamic";
 
@@ -11,20 +12,14 @@ const TAGLINE =
   "a public log of songs that altered my brain chemistry";
 const ABOUT = process.env.NEXT_PUBLIC_ABOUT || "";
 
-function Player({ entry }: { entry: Entry }) {
+// Collapsed by default: the players are tall, and a page of them would bury
+// the notes. The toggle lives in a client component so the iframe is only
+// mounted once asked for — see app/player.tsx for why.
+function TrackPlayer({ entry }: { entry: Entry }) {
   const embed = embedFor(entry);
   if (!embed) return null;
   return (
-    <div className="embed">
-      <iframe
-        src={embed.src}
-        title={embed.title}
-        height={embed.height}
-        loading="lazy"
-        allow="encrypted-media; clipboard-write; picture-in-picture"
-        referrerPolicy="strict-origin-when-cross-origin"
-      />
-    </div>
+    <Player src={embed.src} height={embed.height} title={embed.title} />
   );
 }
 
@@ -124,7 +119,7 @@ function TrackEntry({
           </div>
         </div>
 
-        <Player entry={entry} />
+        <TrackPlayer entry={entry} />
 
         {(entry.note || entry.mood) && (
           <div className="cardnotes">
