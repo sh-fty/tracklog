@@ -13,7 +13,11 @@ export type Entry = {
   addedAt: string;
 };
 
-export type Journal = { entries: Entry[] };
+// `rev` is set on every write. It is what makes it safe to prefer an
+// in-memory copy over what the CDN hands back: we can tell which of the two is
+// actually newer instead of guessing. Entries written before this existed have
+// no rev, which reads as 0 and always loses.
+export type Journal = { entries: Entry[]; rev?: number };
 
 // Local development and production share one Blob store, because they share
 // one BLOB_READ_WRITE_TOKEN. Without separate keys, anything written while
@@ -64,25 +68,26 @@ async function readBlobText(prefix: string): Promise<string | null> {
   return res.text();
 }
 
-// What this instance last wrote, and when.
+// What this instance last wrote.
 //
-// Reads can be up to 60s stale (Vercel's cache floor), and every mutation here
-// is read-modify-write over the whole file. Two edits inside that window
-// therefore lose data: the second one reads a copy from before the first one's
-// write and puts it back, silently reverting it. Observed directly — deleting
-// one entry reinstated it and dropped a different, untouched one.
+// The store gives no read-after-write consistency: a read can return content
+// from before the last write — observed at `age: 91` against a `max-age=60`,
+// so even the stated TTL is not a bound. Every mutation here is
+// read-modify-write over the whole file, so two edits inside that window lose
+// data; the second reads a pre-write copy and puts it back.
 //
-// Serving the journal we just wrote closes that window. It only covers
-// mutations handled by the same instance, which for a single-author site is
-// the ordinary case, but it is a mitigation rather than a guarantee: a write
-// from another instance inside the same minute can still be missed.
-let lastWrite: { journal: Journal; at: number } | null = null;
-const WRITE_TRUST_MS = 90_000;
+// An earlier version of this preferred the in-memory copy unconditionally for
+// 90s, which was worse: if another instance had written more recently, this
+// one served an older journal, so entries appeared to have vanished and a
+// write built on it would have deleted them for real. Comparing `rev` fixes
+// that — the in-memory copy is used only when it is provably newer than what
+// came back, and a newer write from anywhere else always wins.
+let lastWrite: Journal | null = null;
 
 // Copied on the way in and out so callers mutating the journal — which every
 // mutating action does — can't reach into this cache.
 function clone(journal: Journal): Journal {
-  return { entries: journal.entries.map((e) => ({ ...e })) };
+  return { entries: journal.entries.map((e) => ({ ...e })), rev: journal.rev };
 }
 
 // Throws when the journal cannot be read or parsed, and that matters: this is
@@ -91,20 +96,21 @@ function clone(journal: Journal): Journal {
 // entry. Display callers catch this and show a warning; mutating callers must
 // let it propagate so the write is abandoned instead.
 export async function readJournal(): Promise<Journal> {
-  if (lastWrite && Date.now() - lastWrite.at < WRITE_TRUST_MS) {
-    return clone(lastWrite.journal);
-  }
   const text = await readBlobText(TRACKS_PATH);
-  if (text === null) return { entries: [] };
-  const parsed = JSON.parse(text) as Journal;
+  const parsed: Journal =
+    text === null ? { entries: [] } : (JSON.parse(text) as Journal);
   if (!Array.isArray(parsed?.entries)) {
     throw new Error("journal blob is not in the expected shape");
   }
-  return { entries: parsed.entries };
+  if (lastWrite && (lastWrite.rev ?? 0) > (parsed.rev ?? 0)) {
+    return clone(lastWrite);
+  }
+  return clone(parsed);
 }
 
 export async function writeJournal(journal: Journal): Promise<void> {
-  lastWrite = { journal: clone(journal), at: Date.now() };
+  journal.rev = Date.now();
+  lastWrite = clone(journal);
   const res = await put(TRACKS_PATH, JSON.stringify(journal, null, 2), {
     access: "public",
     addRandomSuffix: false,

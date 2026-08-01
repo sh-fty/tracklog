@@ -58,7 +58,12 @@ export async function saveEntry(formData: FormData): Promise<SaveResult> {
   }
 
   const entry = journal.entries.find((e) => e.id === id);
-  if (!entry) return { ok: false, error: "that entry no longer exists" };
+  if (!entry) {
+    return {
+      ok: false,
+      error: "this track was removed elsewhere — reload to see the current list",
+    };
+  }
 
   // Every field here clears when blank, except title, which is required and
   // rejected above rather than silently falling back to the old value.
@@ -87,8 +92,13 @@ export async function deleteEntry(id: string): Promise<DeleteResult> {
   }
 
   const remaining = journal.entries.filter((e) => e.id !== id);
+
+  // Deleting something already gone is a success, not an error. Reads lag
+  // writes here, so a stale render can still show an entry that has been
+  // removed; asking for it to go away again should just work.
   if (remaining.length === journal.entries.length) {
-    return { ok: false, error: "that entry no longer exists" };
+    revalidatePath("/");
+    return { ok: true };
   }
 
   await writeJournal({ entries: remaining });
