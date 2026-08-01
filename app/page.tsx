@@ -2,14 +2,14 @@ import { isAdmin } from "@/lib/auth";
 import { embedFor } from "@/lib/embed";
 import { bumpHits, readJournal, type Entry, type Journal } from "@/lib/store";
 import { deleteEntry, login, logout, saveEntry } from "./actions";
+import { EditForm, EditProvider, EditToggle } from "./edit-panel";
 import { Player } from "./player";
 
 export const dynamic = "force-dynamic";
 
 const TITLE = process.env.NEXT_PUBLIC_SITE_TITLE || "trackl0g";
 const TAGLINE =
-  process.env.NEXT_PUBLIC_SITE_TAGLINE ||
-  "songs that alter my brain chemistry";
+  process.env.NEXT_PUBLIC_SITE_TAGLINE || "songs that alter my brain chemistry";
 const ABOUT = process.env.NEXT_PUBLIC_ABOUT || "";
 
 // Collapsed by default: the players are tall, and a page of them would bury
@@ -18,52 +18,7 @@ const ABOUT = process.env.NEXT_PUBLIC_ABOUT || "";
 function TrackPlayer({ entry }: { entry: Entry }) {
   const embed = embedFor(entry);
   if (!embed) return null;
-  return (
-    <Player src={embed.src} height={embed.height} title={embed.title} />
-  );
-}
-
-function EditPanel({ entry }: { entry: Entry }) {
-  return (
-    <details className="edit">
-      <summary className="crs">✎ edit</summary>
-      <form action={saveEntry} className="editform">
-        <input type="hidden" name="id" value={entry.id} />
-        <label className="crs" htmlFor={`t-${entry.id}`}>
-          title
-        </label>
-        <input id={`t-${entry.id}`} name="title" defaultValue={entry.title} />
-        <label className="crs" htmlFor={`a-${entry.id}`}>
-          artist
-        </label>
-        <input
-          id={`a-${entry.id}`}
-          name="artist"
-          defaultValue={entry.artist ?? ""}
-        />
-        <label className="crs" htmlFor={`n-${entry.id}`}>
-          note
-        </label>
-        <textarea
-          id={`n-${entry.id}`}
-          name="note"
-          defaultValue={entry.note ?? ""}
-        />
-        <label className="crs" htmlFor={`m-${entry.id}`}>
-          dimension
-        </label>
-        <input id={`m-${entry.id}`} name="mood" defaultValue={entry.mood ?? ""} />
-        <div className="editactions">
-          <button type="submit" formAction={deleteEntry} className="btn95 danger">
-            delete
-          </button>
-          <button type="submit" className="btn95">
-            save
-          </button>
-        </div>
-      </form>
-    </details>
-  );
+  return <Player src={embed.src} height={embed.height} title={embed.title} />;
 }
 
 function TrackEntry({
@@ -77,63 +32,79 @@ function TrackEntry({
 }) {
   return (
     <article className="entry" id={entry.id}>
-      <div className="card bvi">
-        <div className="cardtop">
-          {entry.art ? (
-            <img
-              className="art"
-              src={entry.art}
-              alt={`artwork for ${entry.title}`}
-              width={84}
-              height={84}
-              loading="lazy"
-            />
-          ) : (
-            <div className="art artfallback" aria-hidden="true">
-              <span />
+      <EditProvider>
+        <div className="card bvi">
+          <div className="cardtop">
+            {entry.art ? (
+              <img
+                className="art"
+                src={entry.art}
+                alt={`artwork for ${entry.title}`}
+                width={84}
+                height={84}
+                loading="lazy"
+              />
+            ) : (
+              <div className="art artfallback" aria-hidden="true">
+                <span />
+              </div>
+            )}
+            <div className="cardmeta">
+              {/* Permalink sits before the edit toggle so that, when the form
+                opens, it wraps onto its own full-width line without stranding
+                the permalink below it. */}
+              <div className="numline crs">
+                <span className="tracknum">
+                  {String(index).padStart(2, "0")}.
+                </span>
+                <a
+                  className="permalink"
+                  href={`#${entry.id}`}
+                  aria-label="permalink"
+                >
+                  #
+                </a>
+                {authed && <EditToggle />}
+              </div>
+              <h2 className="tt">{entry.title}</h2>
+              {entry.artist && <p className="ta">{entry.artist}</p>}
+            </div>
+          </div>
+
+          {/* Both controls share a row; the expanded player takes a full-width
+            line beneath them by wrapping within this flex container. */}
+          <div className="cardrow">
+            <a
+              className="provbtn crs"
+              href={entry.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ▶ from {entry.provider}
+            </a>
+            <TrackPlayer entry={entry} />
+          </div>
+
+          {(entry.note || entry.mood) && (
+            <div className="cardnotes">
+              {entry.note && <p className="note">{entry.note}</p>}
+              {entry.mood && (
+                <p className="moodline crs">
+                  currently in <b>{entry.mood}</b> dimension
+                </p>
+              )}
             </div>
           )}
-          <div className="cardmeta">
-            <p className="numline crs">
-              <span className="tracknum">{String(index).padStart(2, "0")}.</span>
-              <a
-                className="permalink"
-                href={`#${entry.id}`}
-                aria-label="permalink"
-              >
-                #
-              </a>
-            </p>
-            <h2 className="tt">{entry.title}</h2>
-            {entry.artist && <p className="ta">{entry.artist}</p>}
-            <p className="cardrow">
-              <a
-                className="provbtn crs"
-                href={entry.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                ▶ from {entry.provider}
-              </a>
-            </p>
-          </div>
+
+          {authed && (
+            <EditForm
+              entry={entry}
+              saveAction={saveEntry}
+              deleteAction={deleteEntry}
+            />
+          )}
         </div>
-
-        <TrackPlayer entry={entry} />
-
-        {(entry.note || entry.mood) && (
-          <div className="cardnotes">
-            {entry.note && <p className="note">{entry.note}</p>}
-            {entry.mood && (
-              <p className="moodline crs">
-                currently in <b>{entry.mood}</b> dimension
-              </p>
-            )}
-          </div>
-        )}
-
-        {authed && <EditPanel entry={entry} />}
-      </div>
+      </EditProvider>
     </article>
   );
 }

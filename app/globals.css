@@ -143,9 +143,8 @@ summary:focus-visible {
   margin: 0;
   font-family: var(--mono);
   font-weight: bold;
-  font-size: 19px;
-  letter-spacing: 4px;
-  text-transform: uppercase;
+  font-size: 21px;
+  letter-spacing: 2px;
   color: #ffffff;
   text-shadow: 0 1px 0 #000;
   overflow-wrap: anywhere;
@@ -311,11 +310,14 @@ summary:focus-visible {
   flex: 1;
 }
 
+/* Track number on the left; permalink and edit toggle pushed to the right.
+   Wraps so the edit form can claim a full-width line of its own below. */
 .numline {
   margin: 0 0 4px;
   font-size: 12px;
   display: flex;
   align-items: baseline;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -404,14 +406,13 @@ summary:focus-visible {
 
 /* ---------- player ---------- */
 
-/* The toggle is a real button; the iframe is only mounted once expanded, so
-   the provider is not contacted until then. */
-.player {
-  margin-top: 10px;
-}
-
+/* The listen toggle sits inline with the "from <provider>" button; when
+   opened, the player claims a full-width line beneath both of them by
+   wrapping within .cardrow. The iframe is only mounted once expanded, so the
+   provider is not contacted until then. */
 .embed {
-  margin-top: 10px;
+  flex: 0 0 100%;
+  margin-top: 2px;
 }
 
 .embed iframe {
@@ -451,32 +452,31 @@ summary:focus-visible {
 
 /* Rendered only when the session cookie checks out server-side, so a
    logged-out visitor never receives this markup at all. */
-.edit {
-  margin-top: 10px;
-  border-top: 1px solid #1e2740;
-  padding-top: 8px;
-}
-
-.edit summary {
+/* Small pencil toggle, parked next to the permalink */
+.editbtn {
+  background: none;
+  border: 0;
+  padding: 0 2px;
+  font-size: 13px;
+  line-height: 1;
+  color: #6f77a0;
   cursor: pointer;
-  font-size: 12px;
-  color: var(--muted);
-  list-style: none;
 }
 
-.edit summary::-webkit-details-marker {
-  display: none;
-}
-
-.edit summary:hover {
+.editbtn:hover,
+.editbtn[aria-expanded="true"] {
   color: var(--amber);
 }
 
+/* Sits at the foot of the card, full width, clear of the artwork column */
 .editform {
   display: flex;
   flex-direction: column;
   gap: 3px;
   margin-top: 8px;
+  padding-top: 9px;
+  border-top: 1px solid #1e2740;
+  text-align: left;
 }
 
 .editform label {
@@ -485,6 +485,22 @@ summary:focus-visible {
   text-transform: uppercase;
   color: #8b93c0;
   margin-top: 6px;
+}
+
+.lblhint {
+  text-transform: none;
+  letter-spacing: 0;
+  color: #626a94;
+}
+
+.editform input::placeholder,
+.editform textarea::placeholder {
+  color: #4c7a4c;
+}
+
+.btn95:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .editactions {
@@ -641,8 +657,8 @@ textarea {
 
 @media (max-width: 480px) {
   .site-title {
-    font-size: 16px;
-    letter-spacing: 3px;
+    font-size: 18px;
+    letter-spacing: 1px;
   }
 
   .art {

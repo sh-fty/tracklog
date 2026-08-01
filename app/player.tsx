@@ -6,10 +6,14 @@ import { useState } from "react";
 // inside a closed <details> anyway — verified in-page: the collapsed player
 // reported as cross-origin loaded. So the iframe is mounted on demand here
 // instead. Nothing is requested from Spotify or SoundCloud, and no visitor is
-// exposed to them, until someone actually asks to play.
+// exposed to them, until someone actually asks to listen.
+//
+// Renders as a fragment so the button can sit inline beside the "from
+// <provider>" link in the card's button row, while the player itself takes a
+// full-width line of its own below it (see .embed in globals.css).
 //
 // This needs JavaScript. Without it there's no inline player, but the
-// "from <provider>" link next to it is a plain anchor and still works.
+// "from <provider>" link beside it is a plain anchor and still works.
 export function Player({
   src,
   height,
@@ -21,14 +25,14 @@ export function Player({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="player">
+    <>
       <button
         type="button"
         className="provbtn crs"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        ♪ play here {open ? "▴" : "▾"}
+        ♪ listen {open ? "▴" : "▾"}
       </button>
       {open && (
         <div className="embed">
@@ -41,6 +45,6 @@ export function Player({
           />
         </div>
       )}
-    </div>
+    </>
   );
 }
