@@ -29,11 +29,6 @@ export default async function Home({
   const hits = await bumpHits();
   const digits = String(hits).padStart(6, "0").slice(-6).split("");
 
-  const latest = journal.entries[0];
-  const spinning = latest
-    ? `now spinning: ${latest.title}${latest.artist ? ` — ${latest.artist}` : ""}`
-    : "the turntable is empty... for now";
-
   return (
     <main className="col">
       <header className="masthead">
@@ -43,12 +38,6 @@ export default async function Home({
       <nav className="navrow crs">
         [ <a href="/">home</a> ] [ <a href="/feed.xml">rss</a> ]
       </nav>
-      <div className="marquee crs" aria-hidden="true">
-        <span>
-          ♫ ♫ {spinning} ♫ ♫ {spinning} ♫ ♫
-        </span>
-      </div>
-
       {ABOUT && <div className="about bv">{ABOUT}</div>}
 
       {storeError && (
@@ -59,11 +48,7 @@ export default async function Home({
       )}
 
       {journal.entries.length === 0 && !storeError && (
-        <p className="nothing">
-          nothing logged yet... the silence is deafening.
-          <br />
-          share a track from your phone to begin the journal.
-        </p>
+        <p className="nothing">empty in here...</p>
       )}
 
       {journal.entries.map((entry, i) => (

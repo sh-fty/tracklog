@@ -87,7 +87,6 @@ body {
    reproduced here. Turning off font smoothing gets close: glyphs render with
    hard aliased edges instead of subpixel blur, which reads as pixel type at
    these sizes. Applied only to the display text, not to body copy. */
-.marquee,
 .trackline,
 .dig,
 .tt,
@@ -211,39 +210,6 @@ summary:focus-visible {
 
 /* ---------- LCD ---------- */
 
-/* Faint horizontal scanlines over the phosphor, as on a backlit LCD */
-.marquee {
-  position: relative;
-  background: var(--well);
-  background-image: repeating-linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.045) 0 1px,
-    transparent 1px 3px
-  );
-  color: var(--lcd);
-  font-size: 13px;
-  letter-spacing: 1px;
-  padding: 8px 0;
-  margin: 8px;
-  overflow: hidden;
-  white-space: nowrap;
-  border: 2px solid;
-  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
-  text-shadow: 0 0 7px rgba(0, 255, 0, 0.6);
-}
-
-.marquee span {
-  display: inline-block;
-  padding-left: 100%;
-  animation: crawl 16s linear infinite;
-}
-
-@keyframes crawl {
-  to {
-    transform: translateX(-100%);
-  }
-}
-
 .about {
   margin: 0 8px 8px;
   padding: 10px 12px;
@@ -361,7 +327,7 @@ summary:focus-visible {
 
 /* Playlist rows are green on black; the selected one inverts to white on
    hard blue. The newest track is treated as the selected row, which lines up
-   with what the marquee at the top says is spinning. */
+   marking the newest track as the one currently playing. */
 .tt {
   margin: 0;
   display: inline;
@@ -477,7 +443,7 @@ summary:focus-visible {
   border: 0;
 }
 
-/* Dimension + note as one LCD readout, matching the marquee up top. Lives in
+/* Dimension + note as one LCD readout. Lives in
    the metadata column beside the artwork, under the title and artist and
    above the button row. */
 .trackline {
@@ -777,8 +743,7 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marquee span {
+  .tlscroll {
     animation: none;
-    padding-left: 8px;
   }
 }

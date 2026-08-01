@@ -56,6 +56,22 @@ export function TrackCard({
     }
   }
 
+  // Return submits from any field, including the note. iOS otherwise inserts a
+  // newline in the textarea rather than submitting, and its keyboard offers no
+  // obvious way to commit the form. Shift+Return still gives a newline on a
+  // hardware keyboard, so multi-line notes are still possible there.
+  function submitOnEnter(e: React.KeyboardEvent<HTMLFormElement>) {
+    if (e.key !== "Enter" || e.shiftKey) return;
+    const el = e.target as HTMLElement;
+    if (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA") return;
+    const form = e.currentTarget;
+    e.preventDefault();
+    // Deferred rather than called inline: requestSubmit() from inside React's
+    // own keydown handling doesn't reach the form action, though the identical
+    // call works once the event has finished dispatching.
+    setTimeout(() => form.requestSubmit(), 0);
+  }
+
   async function handleDelete() {
     setBusy(true);
     setError(null);
@@ -178,7 +194,11 @@ export function TrackCard({
         )}
 
         {authed && editing && (
-          <form action={handleSave} className="editform">
+          <form
+            action={handleSave}
+            className="editform"
+            onKeyDown={submitOnEnter}
+          >
             <input type="hidden" name="id" value={entry.id} />
 
             <label className="crs" htmlFor={`t-${entry.id}`}>
@@ -189,6 +209,8 @@ export function TrackCard({
               name="title"
               type="text"
               required
+              autoCapitalize="none"
+              enterKeyHint="done"
               defaultValue={entry.title}
             />
 
@@ -199,6 +221,8 @@ export function TrackCard({
               id={`a-${entry.id}`}
               name="artist"
               type="text"
+              autoCapitalize="none"
+              enterKeyHint="done"
               defaultValue={entry.artist ?? ""}
               placeholder="blank — spotify doesn't supply one"
             />
@@ -209,6 +233,8 @@ export function TrackCard({
             <textarea
               id={`n-${entry.id}`}
               name="note"
+              autoCapitalize="none"
+              enterKeyHint="done"
               defaultValue={entry.note ?? ""}
             />
 
@@ -219,11 +245,13 @@ export function TrackCard({
               id={`m-${entry.id}`}
               name="mood"
               type="text"
+              autoCapitalize="none"
+              enterKeyHint="done"
               defaultValue={entry.mood ?? ""}
             />
 
             <p className="editnote crs">
-              every field except title clears when left blank.
+              return saves · every field except title clears when left blank.
             </p>
 
             {error && <p className="editerr crs">{error}</p>}
