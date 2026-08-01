@@ -9,7 +9,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#191947",
+  // Matches the masthead so the browser chrome blends into the page on mobile,
+  // where the layout now runs edge to edge.
+  themeColor: "#ff5ca8",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

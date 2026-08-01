@@ -7,8 +7,9 @@
   --paper: #f4f1e2;
   --pinky: #ff5ca8;
   --pinkpale: #ffeef7;
-  --ink: #2b2b2b;
-  --fade: #8a8770;
+  --ink: #191919;
+  /* Muted text still has to clear WCAG AA on cream; the old #8a8770 did not. */
+  --fade: #56543f;
   --lime: #7cfc00;
   --linkblue: #1414c8;
   --linkvisited: #7a1fa2;
@@ -22,6 +23,13 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Scrollbar hidden so the page reads as an app surface, not a document.
+     Scrolling itself is untouched — wheel, trackpad, touch and keys all work. */
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
 }
 
 body {
@@ -179,25 +187,9 @@ textarea:focus-visible {
   color: var(--fade);
 }
 
-.newbadge {
-  color: #e00040;
-  font-weight: bold;
-  margin-left: 6px;
-}
-
-.blink {
-  animation: blink 1s steps(1) infinite;
-}
-
-@keyframes blink {
-  50% {
-    opacity: 0;
-  }
-}
-
 .rule {
   border-top: 1px solid #fff;
-  border-bottom: 1px solid #c9c6b2;
+  border-bottom: 1px solid #b3b09a;
   margin: 6px 0 12px;
 }
 
@@ -259,8 +251,8 @@ textarea:focus-visible {
   margin: 2px 0 0;
   font-family: "Times New Roman", Times, serif;
   font-style: italic;
-  font-size: 14px;
-  color: #4a4a6e;
+  font-size: 15px;
+  color: #33335c;
 }
 
 .cardrow {
@@ -272,12 +264,30 @@ textarea:focus-visible {
   flex-wrap: wrap;
 }
 
-.chip {
-  border: 1px solid var(--navy);
-  background: #fff;
-  padding: 1px 7px;
-  font-size: 11px;
+/* One beveled button per entry, replacing the old provider chip + text link. */
+.provbtn {
+  display: inline-block;
+  background: #e6e2ce;
+  border: 2px solid;
+  border-color: var(--bevel-lt) var(--bevel-dk) var(--bevel-dk) var(--bevel-lt);
+  padding: 5px 12px;
+  font-size: 12px;
   color: var(--navy);
+  text-decoration: none;
+}
+
+.provbtn:visited {
+  color: var(--navy);
+}
+
+.provbtn:hover {
+  background: var(--pinky);
+  color: #fff;
+}
+
+.provbtn:active {
+  border-color: var(--bevel-dk) var(--bevel-lt) var(--bevel-lt) var(--bevel-dk);
+  transform: translate(1px, 1px);
 }
 
 .embed {
@@ -291,24 +301,25 @@ textarea:focus-visible {
 
 .note {
   margin: 12px 0 0;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.65;
+  color: var(--ink);
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
 
 .moodline {
   margin: 10px 0 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--fade);
 }
 
 .moodline b {
-  color: #a4004f;
+  color: #8d0043;
 }
 
 .entrysep {
-  border-top: 1px solid #c9c6b2;
+  border-top: 1px solid #b3b09a;
   border-bottom: 1px solid #fff;
   margin: 18px 0 0;
 }
@@ -349,7 +360,7 @@ textarea:focus-visible {
 
 .footlinks {
   margin: 9px 0 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--fade);
 }
 
@@ -485,11 +496,35 @@ textarea {
   font-size: 12px;
 }
 
-@media (max-width: 480px) {
+/* On phones the page stops being a document floating on a starfield and
+   becomes the whole surface: edge to edge, full viewport height, no frame.
+   100dvh rather than 100vh so it accounts for the browser's collapsing chrome. */
+@media (max-width: 640px) {
   body {
-    padding: 16px 6px 44px;
+    padding: 0;
+    background-image: none;
+    background-color: var(--cream);
+    overscroll-behavior-y: none;
   }
 
+  .col {
+    max-width: none;
+    min-height: 100vh;
+    min-height: 100dvh;
+    border: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Keeps the hit counter pinned to the bottom when there are few entries,
+     so a near-empty journal still fills the screen like an app would. */
+  .counterbox {
+    margin-top: auto;
+  }
+}
+
+@media (max-width: 480px) {
   .site-title {
     font-size: 24px;
   }
@@ -516,9 +551,5 @@ textarea {
   .marquee span {
     animation: none;
     padding-left: 8px;
-  }
-
-  .blink {
-    animation: none;
   }
 }

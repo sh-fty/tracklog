@@ -20,7 +20,7 @@ export default async function AdminPage({
           <p className="tagline cms">members only!! (it&apos;s just you)</p>
         </header>
         <div className="adm-body">
-          {params.bad && <p className="adm-bad blink">wrong password!!</p>}
+          {params.bad && <p className="adm-bad">wrong password!!</p>}
           <form action={login} className="adm-login bv">
             <label className="crs" htmlFor="key">
               journal secret

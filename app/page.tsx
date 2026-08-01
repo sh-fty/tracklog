@@ -25,19 +25,10 @@ function stamp(iso: string): string {
     .replace(/,\s*/g, " · ");
 }
 
-function isFresh(iso: string): boolean {
-  return Date.now() - new Date(iso).getTime() < 48 * 60 * 60 * 1000;
-}
-
 function TrackEntry({ entry }: { entry: Entry }) {
   return (
     <article className="entry" id={entry.id}>
-      <p className="dateline crs">
-        {stamp(entry.addedAt)}
-        {isFresh(entry.addedAt) && (
-          <span className="newbadge blink">★ new!! ★</span>
-        )}
-      </p>
+      <p className="dateline crs">{stamp(entry.addedAt)}</p>
       <div className="rule" />
       <div className="card bv">
         {entry.art ? (
@@ -58,14 +49,13 @@ function TrackEntry({ entry }: { entry: Entry }) {
           <h2 className="tt">{entry.title}</h2>
           {entry.artist && <p className="ta">{entry.artist}</p>}
           <p className="cardrow">
-            <span className="chip crs">{entry.provider}</span>
             <a
-              className="crs"
+              className="provbtn crs"
               href={entry.url}
               target="_blank"
               rel="noopener noreferrer"
             >
-              ▶ listen on {entry.provider}
+              ▶ from {entry.provider}
             </a>
           </p>
         </div>
