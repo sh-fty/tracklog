@@ -6,17 +6,20 @@
    visualiser) is reproduced, since this page can't play anything itself and
    those controls would misstate what it does. */
 :root {
-  --desk: #171a2e;
-  --face: #3f4468;
-  --face-lo: #2f3352;
-  --face-hi: #565c8a;
-  --lt: #8f96c4;
-  --dk: #10121f;
+  /* The bright blue behind the window is the desktop the player sat on, not
+     part of the player. Everything else is deliberately dark and desaturated
+     — the base skin is charcoal blue-grey, not lavender. */
+  --desk: #1a3fa8;
+  --face: #2e3440;
+  --face-lo: #232833;
+  --face-hi: #3e4655;
+  --lt: #767f92;
+  --dk: #0c0f14;
 
-  --title-a: #4d5488;
-  --title-b: #222840;
-  --gold: #d9c98d;
-  --gold-dk: #8b7c47;
+  --title-a: #58627a;
+  --title-b: #232833;
+  --gold: #cbbd8a;
+  --gold-dk: #7d7147;
 
   /* Silver button face with dark ink, as on a classic transport bar */
   --btn: #c6cad6;
@@ -25,15 +28,17 @@
   --btn-ink: #14162a;
 
   --well: #000000;
-  --lcd: #14ff14;
-  --lcd-dim: #0a9e0a;
-  --amber: #ffa02c;
+  --lcd: #00ff00;
+  --lcd-dim: #00a800;
+  --amber: #ff9d2e;
+  /* Selected playlist row: white on hard blue */
+  --sel: #0000c6;
 
-  --txt: #eceffc;
-  --muted: #aab2df;
+  --txt: #e8ecf5;
+  --muted: #99a3ba;
   --hot: #ff5ca8;
-  --linkblue: #9fc3ff;
-  --linkvisited: #d8b0ff;
+  --linkblue: #8fb8ff;
+  --linkvisited: #cba6ff;
 
   /* System mono renders far cleaner on iOS than Courier New, which comes out
      thin and serif-ish there. No webfont, so nothing is fetched off-origin. */
@@ -76,6 +81,21 @@ body {
 
 .crs {
   font-family: var(--mono);
+}
+
+/* A real skin ships a bitmap font as part of its artwork, which can't be
+   reproduced here. Turning off font smoothing gets close: glyphs render with
+   hard aliased edges instead of subpixel blur, which reads as pixel type at
+   these sizes. Applied only to the display text, not to body copy. */
+.marquee,
+.trackline,
+.dig,
+.tt,
+.ta,
+.tracknum,
+.clabel {
+  -webkit-font-smoothing: none;
+  font-smooth: never;
 }
 
 a {
@@ -209,7 +229,7 @@ summary:focus-visible {
   white-space: nowrap;
   border: 2px solid;
   border-color: var(--dk) var(--lt) var(--lt) var(--dk);
-  text-shadow: 0 0 7px rgba(20, 255, 20, 0.65);
+  text-shadow: 0 0 7px rgba(0, 255, 0, 0.6);
 }
 
 .marquee span {
@@ -339,23 +359,35 @@ summary:focus-visible {
   color: var(--btn-ink);
 }
 
+/* Playlist rows are green on black; the selected one inverts to white on
+   hard blue. The newest track is treated as the selected row, which lines up
+   with what the marquee at the top says is spinning. */
 .tt {
   margin: 0;
+  display: inline;
   font-family: var(--mono);
   font-size: 15px;
   font-weight: bold;
   letter-spacing: 0.3px;
-  color: var(--txt);
+  color: var(--lcd);
   overflow-wrap: anywhere;
 }
 
+.current .tt {
+  background: var(--sel);
+  color: #ffffff;
+  box-shadow: 0 0 0 2px var(--sel);
+  /* Keeps the highlight even across a title that wraps to two lines */
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
 .ta {
-  margin: 4px 0 0;
+  margin: 5px 0 0;
   font-family: var(--mono);
   font-size: 13px;
-  color: var(--lcd);
+  color: #00c000;
   overflow-wrap: anywhere;
-  text-shadow: 0 0 6px rgba(20, 255, 20, 0.4);
 }
 
 .cardrow {
@@ -421,31 +453,42 @@ summary:focus-visible {
   border: 0;
 }
 
-/* Note and dimension sit inside the track box, under a divider. */
-.cardnotes {
+/* Dimension + note as one LCD readout, matching the marquee up top. */
+.trackline {
   margin-top: 10px;
-  padding-top: 9px;
-  border-top: 1px solid #1e2740;
-}
-
-.note {
-  margin: 0;
-  font-family: var(--ui);
-  font-size: 14px;
-  line-height: 1.6;
-  color: #d6f5d6;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-}
-
-.moodline {
-  margin: 8px 0 0;
+  padding: 5px 0;
+  background: var(--well);
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05) 0 1px,
+    transparent 1px 3px
+  );
+  border: 2px solid;
+  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
+  color: var(--lcd);
   font-size: 12px;
-  color: var(--muted);
+  letter-spacing: 0.5px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
-.moodline b {
-  color: var(--amber);
+.trackline > span {
+  display: inline-block;
+  padding-left: 8px;
+}
+
+/* Content is duplicated in the markup, so -50% loops seamlessly with no gap.
+   Duration is set inline from the string length to hold the speed constant. */
+.tlscroll {
+  animation-name: tlcrawl;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes tlcrawl {
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 /* ---------- keeper-only editing ---------- */
@@ -574,7 +617,7 @@ textarea {
   padding: 3px 7px;
   border: 1px solid #000;
   margin: 0 1px;
-  text-shadow: 0 0 7px rgba(20, 255, 20, 0.7);
+  text-shadow: 0 0 7px rgba(0, 255, 0, 0.65);
 }
 
 .footlinks {

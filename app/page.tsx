@@ -21,19 +21,52 @@ function TrackPlayer({ entry }: { entry: Entry }) {
   return <Player src={embed.src} height={embed.height} title={embed.title} />;
 }
 
+// Dimension and note collapse into a single LCD line, styled like the
+// scrolling title readout on a player: the track is the subject, the prose is
+// supporting chrome. Short strings sit still — a player only scrolls a title
+// that doesn't fit — and longer ones crawl. The text is duplicated so the
+// -50% loop is seamless, and the duration scales with length so the speed is
+// constant regardless of how much was written.
+function TrackLine({ entry }: { entry: Entry }) {
+  const parts: string[] = [];
+  if (entry.mood) parts.push(`in ${entry.mood} dimension`);
+  if (entry.note) parts.push(entry.note);
+  if (!parts.length) return null;
+
+  const text = parts.join("  \u00b7\u00b7\u00b7  ");
+  const scrolls = text.length > 38;
+
+  return (
+    <div className="trackline crs" title={text}>
+      {scrolls ? (
+        <span
+          className="tlscroll"
+          style={{ animationDuration: `${Math.round(text.length * 0.34)}s` }}
+        >
+          {`${text}  \u00b7\u00b7\u00b7  ${text}  \u00b7\u00b7\u00b7  `}
+        </span>
+      ) : (
+        <span>{text}</span>
+      )}
+    </div>
+  );
+}
+
 function TrackEntry({
   entry,
   index,
   authed,
+  current,
 }: {
   entry: Entry;
   index: number;
   authed: boolean;
+  current: boolean;
 }) {
   return (
     <article className="entry" id={entry.id}>
       <EditProvider>
-        <div className="card bvi">
+        <div className={current ? "card bvi current" : "card bvi"}>
           <div className="cardtop">
             {entry.art ? (
               <img
@@ -85,16 +118,7 @@ function TrackEntry({
             <TrackPlayer entry={entry} />
           </div>
 
-          {(entry.note || entry.mood) && (
-            <div className="cardnotes">
-              {entry.note && <p className="note">{entry.note}</p>}
-              {entry.mood && (
-                <p className="moodline crs">
-                  currently in <b>{entry.mood}</b> dimension
-                </p>
-              )}
-            </div>
-          )}
+          <TrackLine entry={entry} />
 
           {authed && (
             <EditForm
@@ -170,6 +194,7 @@ export default async function Home({
           entry={entry}
           index={i + 1}
           authed={authed}
+          current={i === 0}
         />
       ))}
 
