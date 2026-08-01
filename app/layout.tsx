@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  // Matches the masthead so the browser chrome blends into the page on mobile,
-  // where the layout now runs edge to edge.
-  themeColor: "#ff5ca8",
+  // Matches the top of the title bar so the browser chrome blends into the
+  // page on mobile, where the layout runs edge to edge.
+  themeColor: "#5f5f9c",
   viewportFit: "cover",
 };
 

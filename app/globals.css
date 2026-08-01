@@ -1,20 +1,28 @@
 @import url("https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,400;0,700;1,400&display=swap");
 
+/* Design language borrowed from late-90s skinnable media players: gunmetal
+   panels with hard 1px bevels, a recessed black LCD readout in phosphor
+   green, and chunky beveled buttons. Nothing here is copied from Winamp —
+   it's all CSS gradients and borders, and none of the functional chrome
+   (equalizer, transport controls, visualizer) is reproduced, since this is
+   a journal and those would be lying about what the page can do. */
 :root {
-  --sky: #191947;
-  --navy: #14143c;
-  --cream: #fffdf3;
-  --paper: #f4f1e2;
-  --pinky: #ff5ca8;
-  --pinkpale: #ffeef7;
-  --ink: #191919;
-  /* Muted text still has to clear WCAG AA on cream; the old #8a8770 did not. */
-  --fade: #56543f;
-  --lime: #7cfc00;
-  --linkblue: #1414c8;
-  --linkvisited: #7a1fa2;
-  --bevel-lt: #ffffff;
-  --bevel-dk: #9d9a86;
+  --desk: #12121b;
+  --face: #3e3e55;
+  --face-lo: #32324a;
+  --face-hi: #4a4a66;
+  --lt: #7d7da0;
+  --dk: #0e0e16;
+  --title-a: #5f5f9c;
+  --title-b: #262641;
+  --lcd-bg: #06120a;
+  --lcd: #21e421;
+  --lcd-dim: #159415;
+  --txt: #e9e9f7;
+  --muted: #b3b3d4;
+  --hot: #ff5ca8;
+  --linkblue: #8ab4ff;
+  --linkvisited: #c79bff;
 }
 
 * {
@@ -24,7 +32,7 @@
 html {
   -webkit-text-size-adjust: 100%;
   /* Scrollbar hidden so the page reads as an app surface, not a document.
-     Scrolling itself is untouched — wheel, trackpad, touch and keys all work. */
+     Scrolling itself is untouched — wheel, trackpad, touch and keys work. */
   scrollbar-width: none;
 }
 
@@ -35,21 +43,18 @@ html::-webkit-scrollbar {
 body {
   margin: 0;
   padding: 28px 10px 64px;
-  background-color: var(--sky);
+  background-color: var(--desk);
   background-image:
-    radial-gradient(circle, rgba(255, 255, 255, 0.9) 1px, transparent 1.7px),
-    radial-gradient(circle, rgba(163, 163, 255, 0.75) 1px, transparent 1.7px),
-    radial-gradient(circle, rgba(255, 255, 255, 0.35) 0.8px, transparent 1.4px);
+    radial-gradient(circle, rgba(255, 255, 255, 0.5) 1px, transparent 1.7px),
+    radial-gradient(circle, rgba(140, 140, 220, 0.4) 1px, transparent 1.7px);
   background-size:
     170px 170px,
-    115px 115px,
-    65px 65px;
+    95px 95px;
   background-position:
     0 0,
-    55px 80px,
-    25px 30px;
+    45px 60px;
   font-family: Verdana, Geneva, sans-serif;
-  color: var(--ink);
+  color: var(--txt);
 }
 
 .crs {
@@ -69,70 +74,106 @@ a:visited {
 }
 
 a:hover {
-  background: var(--pinky);
-  color: #fff;
+  background: var(--hot);
+  color: #12121b;
 }
 
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid var(--pinky);
+  outline: 2px solid var(--lcd);
   outline-offset: 1px;
 }
 
 ::selection {
-  background: var(--pinky);
-  color: #fff;
+  background: var(--lcd);
+  color: #06120a;
 }
 
+/* Raised bevel (buttons, panel faces) */
 .bv {
   border: 2px solid;
-  border-color: var(--bevel-lt) var(--bevel-dk) var(--bevel-dk) var(--bevel-lt);
+  border-color: var(--lt) var(--dk) var(--dk) var(--lt);
 }
 
+/* Recessed bevel (displays, wells) */
 .bvi {
   border: 2px solid;
-  border-color: var(--bevel-dk) var(--bevel-lt) var(--bevel-lt) var(--bevel-dk);
+  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
 }
+
+/* ---------- the window ---------- */
 
 .col {
   max-width: 600px;
   margin: 0 auto;
-  background: var(--cream);
-  border: 3px solid var(--navy);
-  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.45);
+  background: var(--face);
+  border: 2px solid;
+  border-color: var(--lt) var(--dk) var(--dk) var(--lt);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.65);
 }
 
+/* Title bar: horizontal gradient with the grip lines that flank the title
+   on classic player windows, drawn with repeating gradients. */
 .masthead {
-  background: var(--pinky);
-  border-bottom: 3px solid var(--navy);
+  background: linear-gradient(
+    180deg,
+    var(--title-a) 0%,
+    var(--title-b) 68%,
+    #1b1b30 100%
+  );
+  border-bottom: 2px solid var(--dk);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
   text-align: center;
-  padding: 16px 12px 12px;
+  padding: 10px 12px 9px;
 }
 
 .site-title {
   margin: 0;
-  font-family: "Times New Roman", Times, serif;
-  font-style: italic;
+  font-family: "Courier New", Courier, monospace;
   font-weight: bold;
-  font-size: 30px;
-  letter-spacing: 1px;
-  color: var(--navy);
+  font-size: 21px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #f2f2ff;
+  text-shadow: 0 1px 0 #000;
   overflow-wrap: anywhere;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Grip lines either side of the title */
+.site-title::before,
+.site-title::after {
+  content: "";
+  flex: 1;
+  height: 9px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.42) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+.deco {
+  display: none;
 }
 
 .tagline {
-  margin: 5px 0 0;
-  font-size: 13px;
-  color: var(--navy);
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #cfcff0;
 }
 
 .navrow {
-  background: var(--pinkpale);
-  border-bottom: 2px solid var(--navy);
+  background: var(--face);
+  border-bottom: 2px solid var(--dk);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
   text-align: center;
-  padding: 6px 8px;
+  padding: 7px 8px;
   font-size: 12px;
 }
 
@@ -140,14 +181,19 @@ textarea:focus-visible {
   margin: 0 3px;
 }
 
+/* ---------- LCD readout ---------- */
+
 .marquee {
-  background: #000;
-  color: var(--lime);
+  background: var(--lcd-bg);
+  color: var(--lcd);
   font-size: 13px;
-  padding: 6px 0;
+  padding: 7px 0;
+  margin: 8px;
   overflow: hidden;
   white-space: nowrap;
-  border-bottom: 2px solid var(--navy);
+  border: 2px solid;
+  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
+  text-shadow: 0 0 6px rgba(33, 228, 33, 0.55);
 }
 
 .marquee span {
@@ -163,51 +209,85 @@ textarea:focus-visible {
 }
 
 .about {
-  margin: 16px 16px 0;
+  margin: 0 8px 8px;
   padding: 10px 12px;
-  background: var(--paper);
+  background: var(--face-lo);
   font-size: 13px;
+  color: var(--txt);
 }
 
 .setupwarn {
-  margin: 16px;
+  margin: 8px;
   padding: 10px 12px;
-  background: #fff3cd;
-  border: 2px dashed #b8860b;
+  background: #4a3a12;
+  border: 2px solid #d6a422;
+  color: #ffe08a;
   font-size: 12px;
 }
 
+/* ---------- playlist entries ---------- */
+
 .entry {
-  padding: 18px 18px 4px;
+  padding: 12px 12px 8px;
 }
 
 .dateline {
-  margin: 0;
+  margin: 0 0 8px;
   font-size: 12px;
-  color: var(--fade);
+  color: var(--muted);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+/* Playlist-style index, in phosphor green like a track number */
+.tracknum {
+  color: var(--lcd);
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.stamp {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Tucked up beside the date instead of orphaned on its own line below */
+.permalink {
+  margin-left: auto;
+  flex-shrink: 0;
+  text-decoration: none;
+  color: var(--muted);
+  padding: 0 4px;
+}
+
+.permalink:hover {
+  background: var(--hot);
+  color: #12121b;
 }
 
 .rule {
-  border-top: 1px solid #fff;
-  border-bottom: 1px solid #b3b09a;
-  margin: 6px 0 12px;
+  display: none;
 }
 
 .card {
-  background: var(--paper);
+  background: var(--face-lo);
   padding: 10px;
   display: flex;
   gap: 12px;
   align-items: center;
+  border: 2px solid;
+  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
 }
 
 .art {
   width: 84px;
   height: 84px;
   object-fit: cover;
-  border: 2px solid var(--navy);
+  border: 2px solid;
+  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
   flex-shrink: 0;
-  background: #0f6e56;
+  background: #0b1b12;
 }
 
 .artfallback {
@@ -219,7 +299,7 @@ textarea:focus-visible {
 .artfallback span {
   width: 38px;
   height: 38px;
-  border: 3px solid var(--cream);
+  border: 3px solid var(--lcd-dim);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -230,7 +310,7 @@ textarea:focus-visible {
   content: "";
   width: 8px;
   height: 8px;
-  background: var(--cream);
+  background: var(--lcd-dim);
   border-radius: 50%;
 }
 
@@ -240,23 +320,23 @@ textarea:focus-visible {
 
 .tt {
   margin: 0;
-  font-family: "Times New Roman", Times, serif;
-  font-size: 19px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 16px;
   font-weight: bold;
-  color: var(--navy);
+  color: var(--txt);
   overflow-wrap: anywhere;
 }
 
 .ta {
-  margin: 2px 0 0;
-  font-family: "Times New Roman", Times, serif;
-  font-style: italic;
-  font-size: 15px;
-  color: #33335c;
+  margin: 3px 0 0;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 13px;
+  color: var(--lcd);
+  overflow-wrap: anywhere;
 }
 
 .cardrow {
-  margin: 8px 0 0;
+  margin: 9px 0 0;
   font-size: 12px;
   display: flex;
   align-items: center;
@@ -264,29 +344,30 @@ textarea:focus-visible {
   flex-wrap: wrap;
 }
 
-/* One beveled button per entry, replacing the old provider chip + text link. */
+/* One beveled button per entry, replacing the old chip + text link pair. */
 .provbtn {
   display: inline-block;
-  background: #e6e2ce;
+  background: linear-gradient(180deg, var(--face-hi), var(--face-lo));
   border: 2px solid;
-  border-color: var(--bevel-lt) var(--bevel-dk) var(--bevel-dk) var(--bevel-lt);
+  border-color: var(--lt) var(--dk) var(--dk) var(--lt);
   padding: 5px 12px;
   font-size: 12px;
-  color: var(--navy);
+  color: var(--txt);
   text-decoration: none;
+  letter-spacing: 0.5px;
 }
 
 .provbtn:visited {
-  color: var(--navy);
+  color: var(--txt);
 }
 
 .provbtn:hover {
-  background: var(--pinky);
-  color: #fff;
+  background: var(--hot);
+  color: #12121b;
 }
 
 .provbtn:active {
-  border-color: var(--bevel-dk) var(--bevel-lt) var(--bevel-lt) var(--bevel-dk);
+  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
   transform: translate(1px, 1px);
 }
 
@@ -300,47 +381,58 @@ textarea:focus-visible {
 }
 
 .note {
-  margin: 12px 0 0;
+  margin: 11px 0 0;
+  padding: 9px 11px;
+  background: var(--lcd-bg);
+  border: 2px solid;
+  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
   font-size: 15px;
-  line-height: 1.65;
-  color: var(--ink);
+  line-height: 1.6;
+  color: #d7ffd7;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
 
 .moodline {
-  margin: 10px 0 0;
+  margin: 9px 0 0;
   font-size: 12px;
-  color: var(--fade);
+  color: var(--muted);
 }
 
 .moodline b {
-  color: #8d0043;
+  color: var(--lcd);
 }
 
 .entrysep {
-  border-top: 1px solid #b3b09a;
-  border-bottom: 1px solid #fff;
-  margin: 18px 0 0;
+  border-top: 1px solid var(--dk);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  margin: 4px 8px 0;
 }
 
 .nothing {
   padding: 26px 18px;
   text-align: center;
   font-size: 13px;
+  color: var(--muted);
 }
 
+/* ---------- counter ---------- */
+
 .counterbox {
-  margin: 18px 10px 10px;
-  background: #ece9d8;
+  margin: 10px 8px 8px;
+  background: var(--face-lo);
   text-align: center;
   padding: 12px 10px;
+  border: 2px solid;
+  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
 }
 
 .clabel {
-  margin: 0 0 7px;
-  font-size: 12px;
-  color: var(--navy);
+  margin: 0 0 8px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .digits {
@@ -349,27 +441,31 @@ textarea:focus-visible {
 
 .dig {
   display: inline-block;
-  background: #111;
-  color: var(--lime);
+  background: var(--lcd-bg);
+  color: var(--lcd);
   font-family: "Courier New", Courier, monospace;
-  font-size: 16px;
-  padding: 2px 6px;
-  border: 1px solid #444;
+  font-size: 17px;
+  font-weight: bold;
+  padding: 3px 7px;
+  border: 1px solid #000;
   margin: 0 1px;
+  text-shadow: 0 0 6px rgba(33, 228, 33, 0.6);
 }
 
 .footlinks {
-  margin: 9px 0 0;
+  margin: 10px 0 0;
   font-size: 12px;
-  color: var(--fade);
+  color: var(--muted);
 }
 
+/* ---------- admin ---------- */
+
 .adm-body {
-  padding: 18px;
+  padding: 14px;
 }
 
 .adm-login {
-  background: var(--paper);
+  background: var(--face-lo);
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -380,6 +476,7 @@ textarea:focus-visible {
 
 .adm-login label {
   font-size: 12px;
+  color: var(--muted);
 }
 
 input,
@@ -394,8 +491,9 @@ textarea {
   font-family: "Courier New", Courier, monospace;
   padding: 6px 8px;
   border: 2px solid;
-  border-color: var(--bevel-dk) var(--bevel-lt) var(--bevel-lt) var(--bevel-dk);
-  background: #fff;
+  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
+  background: var(--lcd-bg);
+  color: var(--lcd);
   width: 100%;
 }
 
@@ -403,44 +501,48 @@ textarea {
   font-family: "Comic Sans MS", "Comic Neue", cursive;
   min-height: 84px;
   resize: vertical;
+  color: #d7ffd7;
 }
 
 .btn95 {
   font-family: "Courier New", Courier, monospace;
-  background: #e6e2ce;
+  background: linear-gradient(180deg, var(--face-hi), var(--face-lo));
   border: 2px solid;
-  border-color: var(--bevel-lt) var(--bevel-dk) var(--bevel-dk) var(--bevel-lt);
+  border-color: var(--lt) var(--dk) var(--dk) var(--lt);
   padding: 5px 14px;
   cursor: pointer;
-  color: var(--navy);
+  color: var(--txt);
+  letter-spacing: 0.5px;
 }
 
 .btn95:active {
-  border-color: var(--bevel-dk) var(--bevel-lt) var(--bevel-lt) var(--bevel-dk);
+  border-color: var(--dk) var(--lt) var(--lt) var(--dk);
   transform: translate(1px, 1px);
 }
 
 .btn95.danger {
-  color: #a10000;
+  color: #ff8a8a;
 }
 
 .adm-bad {
   text-align: center;
-  color: #e00040;
+  color: #ff6b6b;
   font-weight: bold;
   font-size: 13px;
 }
 
 .adm-hint {
   font-size: 12px;
-  color: var(--fade);
+  color: var(--muted);
   text-align: center;
 }
 
 .adm-entry {
-  background: var(--paper);
+  background: var(--face-lo);
   padding: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  border: 2px solid;
+  border-color: var(--lt) var(--dk) var(--dk) var(--lt);
 }
 
 .adm-head {
@@ -453,13 +555,14 @@ textarea {
 .adm-head img {
   width: 44px;
   height: 44px;
-  border: 2px solid var(--navy);
+  border: 2px solid var(--dk);
   object-fit: cover;
 }
 
 .adm-head .who {
   min-width: 0;
   font-size: 13px;
+  color: var(--muted);
   overflow-wrap: anywhere;
 }
 
@@ -475,7 +578,9 @@ textarea {
   display: block;
   font-size: 11px;
   margin-bottom: 3px;
-  color: var(--fade);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .adm-note {
@@ -496,14 +601,16 @@ textarea {
   font-size: 12px;
 }
 
-/* On phones the page stops being a document floating on a starfield and
+/* ---------- mobile ---------- */
+
+/* On phones the page stops being a document floating on a desktop and
    becomes the whole surface: edge to edge, full viewport height, no frame.
-   100dvh rather than 100vh so it accounts for the browser's collapsing chrome. */
+   100dvh rather than 100vh so it accounts for collapsing browser chrome. */
 @media (max-width: 640px) {
   body {
     padding: 0;
     background-image: none;
-    background-color: var(--cream);
+    background-color: var(--face);
     overscroll-behavior-y: none;
   }
 
@@ -517,8 +624,8 @@ textarea {
     flex-direction: column;
   }
 
-  /* Keeps the hit counter pinned to the bottom when there are few entries,
-     so a near-empty journal still fills the screen like an app would. */
+  /* Keeps the counter pinned to the bottom when there are few entries, so a
+     near-empty journal still fills the screen the way an app would. */
   .counterbox {
     margin-top: auto;
   }
@@ -526,11 +633,8 @@ textarea {
 
 @media (max-width: 480px) {
   .site-title {
-    font-size: 24px;
-  }
-
-  .deco {
-    display: none;
+    font-size: 17px;
+    letter-spacing: 2px;
   }
 
   .art {
@@ -539,7 +643,7 @@ textarea {
   }
 
   .tt {
-    font-size: 17px;
+    font-size: 15px;
   }
 
   .adm-grid {

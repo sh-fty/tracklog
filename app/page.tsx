@@ -25,10 +25,16 @@ function stamp(iso: string): string {
     .replace(/,\s*/g, " · ");
 }
 
-function TrackEntry({ entry }: { entry: Entry }) {
+function TrackEntry({ entry, index }: { entry: Entry; index: number }) {
   return (
     <article className="entry" id={entry.id}>
-      <p className="dateline crs">{stamp(entry.addedAt)}</p>
+      <p className="dateline crs">
+        <span className="tracknum">{String(index).padStart(2, "0")}.</span>
+        <span className="stamp">{stamp(entry.addedAt)}</span>
+        <a className="permalink" href={`#${entry.id}`} aria-label="permalink">
+          #
+        </a>
+      </p>
       <div className="rule" />
       <div className="card bv">
         {entry.art ? (
@@ -67,15 +73,11 @@ function TrackEntry({ entry }: { entry: Entry }) {
         />
       )}
       {entry.note && <p className="note cms">{entry.note}</p>}
-      <p className="moodline crs">
-        {entry.mood && (
-          <>
-            current mood: <b>{entry.mood}</b>
-            {" ★ "}
-          </>
-        )}
-        <a href={`#${entry.id}`}>#</a>
-      </p>
+      {entry.mood && (
+        <p className="moodline crs">
+          current mood: <b>{entry.mood}</b>
+        </p>
+      )}
     </article>
   );
 }
@@ -135,7 +137,7 @@ export default async function Home() {
       {journal.entries.map((entry, i) => (
         <div key={entry.id}>
           {i > 0 && <div className="entrysep" />}
-          <TrackEntry entry={entry} />
+          <TrackEntry entry={entry} index={i + 1} />
         </div>
       ))}
 
