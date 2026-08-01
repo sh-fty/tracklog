@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { COOKIE_NAME, isAdmin, secretMatches, sessionToken } from "@/lib/auth";
+import { extractUrl, resolveMeta } from "@/lib/metadata";
 import { readJournal, writeJournal, type Entry } from "@/lib/store";
 
 export async function login(formData: FormData) {
@@ -75,6 +76,26 @@ export async function saveEntry(formData: FormData): Promise<SaveResult> {
   entry.artist = optional("artist");
   entry.note = optional("note");
   entry.mood = optional("mood");
+
+  // Re-linking. Shared links that resolve to nothing — a Shazam page, say —
+  // can be logged with a note now and pointed at a real record later. When the
+  // link changes the title, artist and artwork are re-fetched from the new
+  // source and replace whatever was in the form, since adopting the new
+  // source's metadata is the whole point. The note and dimension are kept.
+  const raw = String(formData.get("url") ?? "").trim();
+  const url = raw ? extractUrl(raw) : null;
+  if (raw && !url) return { ok: false, error: "that doesn't look like a link" };
+
+  if (url && url !== entry.url) {
+    const meta = await resolveMeta(url);
+    entry.url = url;
+    entry.provider = meta.provider;
+    // A resolution that failed hands back the URL as the title; don't let that
+    // overwrite a title the entry already has.
+    if (meta.title && meta.title !== url) entry.title = meta.title;
+    if (meta.artist) entry.artist = meta.artist;
+    if (meta.art) entry.art = meta.art;
+  }
 
   await writeJournal(journal);
   revalidatePath("/");

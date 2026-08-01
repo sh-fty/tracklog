@@ -227,6 +227,21 @@ export function TrackCard({
               placeholder="blank — spotify doesn't supply one"
             />
 
+            <label className="crs" htmlFor={`u-${entry.id}`}>
+              link <span className="lblhint">(re-fetches title/artist/art)</span>
+            </label>
+            <input
+              id={`u-${entry.id}`}
+              name="url"
+              type="text"
+              inputMode="url"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint="done"
+              defaultValue={entry.url}
+            />
+
             <label className="crs" htmlFor={`n-${entry.id}`}>
               note
             </label>
@@ -251,7 +266,7 @@ export function TrackCard({
             />
 
             <p className="editnote crs">
-              return saves · every field except title clears when left blank.
+              return saves · changing the link re-fetches title, artist and artwork · other fields clear when left blank.
             </p>
 
             {error && <p className="editerr crs">{error}</p>}

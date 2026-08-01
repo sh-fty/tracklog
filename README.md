@@ -85,14 +85,23 @@ not apps. Spotify appears on the other side: you share *to* the shortcut.
    the link inside it.
 4. **Ask for Input** → Text → `any notes?` → **Set Variable** `note`.
 5. **Ask for Input** → Text → `dimension?` → **Set Variable** `mood`.
-6. **Get Contents of URL**:
+6. **Ask for Input** → Text → `artist?` → **Set Variable** `artist`. Leave it
+   blank whenever you like; see below for when it's used.
+7. **Get Contents of URL**:
    - URL: `https://YOUR-APP.vercel.app/api/add`
    - Method: **POST**
    - Headers: `Authorization` = `Bearer YOUR-JOURNAL-SECRET`
-   - Request Body: **JSON**, three fields — `url` = **Shortcut Input**,
-     `note` = `note`, `mood` = `mood`
-7. Optional: **Get Dictionary Value** for key `logged`, then **Show
+   - Request Body: **JSON**, four fields — `url` = **Shortcut Input**,
+     `note` = `note`, `mood` = `mood`, `artist` = `artist`
+8. Optional: **Get Dictionary Value** for key `logged`, then **Show
    Notification** with it, for a confirmation toast.
+
+The artist prompt is a *fallback, not an override*: the server uses it only
+when the platform didn't supply an artist of its own. Spotify's oEmbed has no
+author field at all, so in practice it fills the Spotify gap, while SoundCloud
+and YouTube keep their own answer and ignore whatever you typed. That means the
+Shortcut can prompt every time and needs no per-platform `If` branch — skip it
+for anything that isn't Spotify, or skip it entirely and fill it in later.
 
 Then: Spotify → a song → **Share** → `log track`.
 
@@ -125,8 +134,15 @@ shortcut is unaffected, and the hashed cookie value is deliberately *not*
 accepted as a bearer.
 
 Signed in, every track grows a small `✎` beside its permalink, opening a panel
-with artist, note, dimension and title, plus a delete button. Saving closes the
-panel. Logged-out visitors never receive that
+with title, artist, link, note and dimension, plus a delete button. Return
+saves from any field. Saving closes the panel.
+
+**Re-linking.** The link is editable, and changing it re-fetches the title,
+artist and artwork from the new source, keeping your note and dimension. That
+covers sharing from somewhere that resolves to nothing — Shazam answers `405`
+to any scraper, so its links arrive with no metadata — letting you log the
+track now with a note about what it is and point it at a real Spotify or
+SoundCloud record later. Logged-out visitors never receive that
 markup, and every mutating action re-checks the cookie on the server — hiding
 the controls is presentation, not the security boundary.
 

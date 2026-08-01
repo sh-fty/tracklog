@@ -568,8 +568,16 @@ summary:focus-visible {
   color: var(--amber);
 }
 
+/* 16px is a floor, not a style choice: iOS Safari zooms the viewport in when
+   a control smaller than that takes focus, and never zooms back out — leaving
+   the page stuck until it's pinched. Buttons don't take focus this way, so
+   they keep their own sizes. */
 input,
 textarea,
+select {
+  font-size: 16px;
+}
+
 button {
   font-size: 14px;
 }

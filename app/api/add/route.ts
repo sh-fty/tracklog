@@ -46,6 +46,12 @@ export async function POST(req: Request) {
     note: clean(body.note),
     mood: clean(body.mood),
     ...meta,
+    // An artist typed into the Shortcut is a fallback, not an override: it
+    // fills the gap only when the platform didn't supply one. Spotify's oEmbed
+    // has no author field at all, so in practice this is the Spotify case,
+    // while SoundCloud and YouTube keep their own answer — which means the
+    // Shortcut can prompt unconditionally and needs no per-platform branch.
+    artist: meta.artist ?? clean(body.artist),
   };
 
   // If the existing journal can't be read, abandon the write. Appending to an
