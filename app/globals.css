@@ -31,8 +31,6 @@
   --lcd: #00ff00;
   --lcd-dim: #00a800;
   --amber: #ff9d2e;
-  /* Selected playlist row: white on hard blue */
-  --sel: #0000c6;
 
   --txt: #e8ecf5;
   --muted: #99a3ba;
@@ -346,9 +344,7 @@ summary:focus-visible {
   color: var(--btn-ink);
 }
 
-/* Playlist rows are green on black; the selected one inverts to white on
-   hard blue. The newest track is treated as the selected row, which lines up
-   marking the newest track as the one currently playing. */
+/* Playlist rows are green on black. */
 .tt {
   margin: 0;
   display: inline;
@@ -358,15 +354,6 @@ summary:focus-visible {
   letter-spacing: 0.3px;
   color: var(--lcd);
   overflow-wrap: anywhere;
-}
-
-.current .tt {
-  background: var(--sel);
-  color: #ffffff;
-  box-shadow: 0 0 0 2px var(--sel);
-  /* Keeps the highlight even across a title that wraps to two lines */
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
 }
 
 .ta {
@@ -483,6 +470,12 @@ summary:focus-visible {
   letter-spacing: 0.5px;
   overflow: hidden;
   white-space: nowrap;
+}
+
+ /* The dimension value only; the surrounding words stay phosphor green */
+.dimword {
+  color: var(--amber);
+  font-weight: bold;
 }
 
 .trackline > span {

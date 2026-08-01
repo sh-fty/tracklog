@@ -17,7 +17,6 @@ export function TrackCard({
   entry: initialEntry,
   index,
   authed,
-  current,
   embed,
   saveAction,
   deleteAction,
@@ -25,7 +24,6 @@ export function TrackCard({
   entry: Entry;
   index: number;
   authed: boolean;
-  current: boolean;
   embed: Embed | null;
   saveAction: (formData: FormData) => Promise<SaveResult>;
   deleteAction: (id: string) => Promise<DeleteResult>;
@@ -87,6 +85,9 @@ export function TrackCard({
     }
   }
 
+  // Plain-text form drives the tooltip and the decision to scroll; the
+  // rendered form marks the dimension word up so it can take the accent
+  // colour, which a single string couldn't do.
   const line = [
     entry.mood ? `in ${entry.mood} dimension` : "",
     entry.note ?? "",
@@ -95,9 +96,22 @@ export function TrackCard({
     .join("  ···  ");
   const scrolls = line.length > 30;
 
+  const SEP = "  ···  ";
+  const readout = (
+    <>
+      {entry.mood && (
+        <>
+          in <b className="dimword">{entry.mood}</b> dimension
+        </>
+      )}
+      {entry.mood && entry.note && SEP}
+      {entry.note}
+    </>
+  );
+
   return (
     <article className="entry" id={entry.id}>
-      <div className={current ? "card bvi current" : "card bvi"}>
+      <div className="card bvi">
         <div className="cardtop">
           {entry.art ? (
             <img
@@ -165,14 +179,18 @@ export function TrackCard({
             {line && (
               <div className="trackline crs" title={line}>
                 {scrolls ? (
+                  // Duplicated so translateX(-50%) loops seamlessly with no gap
                   <span
                     className="tlscroll"
                     style={{ animationDuration: `${Math.round(line.length * 0.34)}s` }}
                   >
-                    {`${line}  ···  ${line}  ···  `}
+                    {readout}
+                    {SEP}
+                    {readout}
+                    {SEP}
                   </span>
                 ) : (
-                  <span>{line}</span>
+                  <span>{readout}</span>
                 )}
               </div>
             )}

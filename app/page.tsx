@@ -37,7 +37,7 @@ export default async function Home({
         <p className="tagline">{TAGLINE}</p>
       </header>
       <nav className="navrow crs">
-        [ <a href="/">home</a> ] [ <a href="/feed.xml">rss</a> ] <RefreshButton />
+        [ <a href="/feed.xml">rss</a> ] <RefreshButton />
       </nav>
       {ABOUT && <div className="about bv">{ABOUT}</div>}
 
@@ -52,13 +52,15 @@ export default async function Home({
         <p className="nothing">empty in here...</p>
       )}
 
+      {/* Newest first, but numbered from the oldest, so the first track ever
+          logged stays 01 and the count grows with the journal rather than
+          renumbering everything each time something is added. */}
       {journal.entries.map((entry, i) => (
         <TrackCard
           key={entry.id}
           entry={entry}
-          index={i + 1}
+          index={journal.entries.length - i}
           authed={authed}
-          current={i === 0}
           embed={embedFor(entry)}
           saveAction={saveEntry}
           deleteAction={deleteEntry}
