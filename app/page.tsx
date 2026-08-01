@@ -1,9 +1,8 @@
 import { isAdmin } from "@/lib/auth";
 import { embedFor } from "@/lib/embed";
-import { bumpHits, readJournal, type Entry, type Journal } from "@/lib/store";
+import { bumpHits, readJournal, type Journal } from "@/lib/store";
 import { deleteEntry, login, logout, saveEntry } from "./actions";
-import { EditForm, EditProvider, EditToggle } from "./edit-panel";
-import { PlayerEmbed, PlayerProvider, PlayerToggle } from "./player";
+import { TrackCard } from "./track-card";
 
 export const dynamic = "force-dynamic";
 
@@ -11,127 +10,6 @@ const TITLE = process.env.NEXT_PUBLIC_SITE_TITLE || "trackl0g by ilygoose";
 const TAGLINE =
   process.env.NEXT_PUBLIC_SITE_TAGLINE || "songs that alter my brain chemistry";
 const ABOUT = process.env.NEXT_PUBLIC_ABOUT || "";
-
-// Collapsed by default: the players are tall, and a page of them would bury
-// the tracks. The iframe is only mounted once asked for — see app/player.tsx.
-function TrackPlayerEmbed({ entry }: { entry: Entry }) {
-  const embed = embedFor(entry);
-  if (!embed) return null;
-  return (
-    <PlayerEmbed src={embed.src} height={embed.height} title={embed.title} />
-  );
-}
-
-// Dimension and note collapse into a single LCD line, styled like the
-// scrolling title readout on a player: the track is the subject, the prose is
-// supporting chrome. Short strings sit still — a player only scrolls a title
-// that doesn't fit — and longer ones crawl. The text is duplicated so the
-// -50% loop is seamless, and the duration scales with length so the speed is
-// constant regardless of how much was written.
-function TrackLine({ entry }: { entry: Entry }) {
-  const parts: string[] = [];
-  if (entry.mood) parts.push(`in ${entry.mood} dimension`);
-  if (entry.note) parts.push(entry.note);
-  if (!parts.length) return null;
-
-  const text = parts.join("  \u00b7\u00b7\u00b7  ");
-  const scrolls = text.length > 30;
-
-  return (
-    <div className="trackline crs" title={text}>
-      {scrolls ? (
-        <span
-          className="tlscroll"
-          style={{ animationDuration: `${Math.round(text.length * 0.34)}s` }}
-        >
-          {`${text}  \u00b7\u00b7\u00b7  ${text}  \u00b7\u00b7\u00b7  `}
-        </span>
-      ) : (
-        <span>{text}</span>
-      )}
-    </div>
-  );
-}
-
-function TrackEntry({
-  entry,
-  index,
-  authed,
-  current,
-}: {
-  entry: Entry;
-  index: number;
-  authed: boolean;
-  current: boolean;
-}) {
-  return (
-    <article className="entry" id={entry.id}>
-      <EditProvider>
-        <PlayerProvider>
-          <div className={current ? "card bvi current" : "card bvi"}>
-            <div className="cardtop">
-              {entry.art ? (
-                <img
-                  className="art"
-                  src={entry.art}
-                  alt={`artwork for ${entry.title}`}
-                  width={84}
-                  height={84}
-                  loading="lazy"
-                />
-              ) : (
-                <div className="art artfallback" aria-hidden="true">
-                  <span />
-                </div>
-              )}
-              <div className="cardmeta">
-                {/* Permalink sits before the edit toggle so that, when the form
-                opens, it wraps onto its own full-width line without stranding
-                the permalink below it. */}
-                <div className="numline crs">
-                  <span className="tracknum">
-                    {String(index).padStart(2, "0")}.
-                  </span>
-                  <a
-                    className="minibtn crs"
-                    href={entry.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    ▶ open {entry.provider}
-                  </a>
-                  {embedFor(entry) && <PlayerToggle />}
-                  <a
-                    className="permalink"
-                    href={`#${entry.id}`}
-                    aria-label="permalink"
-                  >
-                    #
-                  </a>
-                  {authed && <EditToggle />}
-                </div>
-                <h2 className="tt">{entry.title}</h2>
-                {entry.artist && <p className="ta">{entry.artist}</p>}
-                <TrackLine entry={entry} />
-              </div>
-            </div>
-
-            {/* Full card width, rather than the narrow metadata column */}
-            <TrackPlayerEmbed entry={entry} />
-
-            {authed && (
-              <EditForm
-                entry={entry}
-                saveAction={saveEntry}
-                deleteAction={deleteEntry}
-              />
-            )}
-          </div>
-        </PlayerProvider>
-      </EditProvider>
-    </article>
-  );
-}
 
 export default async function Home({
   searchParams,
@@ -189,12 +67,15 @@ export default async function Home({
       )}
 
       {journal.entries.map((entry, i) => (
-        <TrackEntry
+        <TrackCard
           key={entry.id}
           entry={entry}
           index={i + 1}
           authed={authed}
           current={i === 0}
+          embed={embedFor(entry)}
+          saveAction={saveEntry}
+          deleteAction={deleteEntry}
         />
       ))}
 

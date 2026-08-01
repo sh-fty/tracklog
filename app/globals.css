@@ -574,9 +574,32 @@ summary:focus-visible {
 
 .editactions {
   display: flex;
+  align-items: center;
   gap: 8px;
   justify-content: flex-end;
   margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.editnote {
+  margin: 10px 0 0;
+  font-size: 10px;
+  color: #7d86ab;
+}
+
+.editerr {
+  margin: 8px 0 0;
+  padding: 5px 8px;
+  background: #3a1414;
+  border: 1px solid #a04040;
+  color: #ff9d9d;
+  font-size: 11px;
+}
+
+.confirmq {
+  margin-right: auto;
+  font-size: 11px;
+  color: var(--amber);
 }
 
 input,
@@ -585,8 +608,13 @@ button {
   font-size: 14px;
 }
 
+/* `input:not([type])` matters: an <input> with no type attribute is a text
+   box, but the attribute selector alone never matches it, which left the edit
+   fields rendering as unstyled browser default boxes beside a styled
+   textarea. */
 input[type="password"],
 input[type="text"],
+input:not([type]),
 textarea {
   font-family: var(--mono);
   padding: 6px 8px;

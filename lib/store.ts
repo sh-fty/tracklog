@@ -45,12 +45,36 @@ async function readBlobText(prefix: string): Promise<string | null> {
   return res.text();
 }
 
+// What this instance last wrote, and when.
+//
+// Reads can be up to 60s stale (Vercel's cache floor), and every mutation here
+// is read-modify-write over the whole file. Two edits inside that window
+// therefore lose data: the second one reads a copy from before the first one's
+// write and puts it back, silently reverting it. Observed directly — deleting
+// one entry reinstated it and dropped a different, untouched one.
+//
+// Serving the journal we just wrote closes that window. It only covers
+// mutations handled by the same instance, which for a single-author site is
+// the ordinary case, but it is a mitigation rather than a guarantee: a write
+// from another instance inside the same minute can still be missed.
+let lastWrite: { journal: Journal; at: number } | null = null;
+const WRITE_TRUST_MS = 90_000;
+
+// Copied on the way in and out so callers mutating the journal — which every
+// mutating action does — can't reach into this cache.
+function clone(journal: Journal): Journal {
+  return { entries: journal.entries.map((e) => ({ ...e })) };
+}
+
 // Throws when the journal cannot be read or parsed, and that matters: this is
 // a read-modify-write store, so any caller that treats a failed read as "the
 // journal is empty" and then writes would permanently destroy every existing
 // entry. Display callers catch this and show a warning; mutating callers must
 // let it propagate so the write is abandoned instead.
 export async function readJournal(): Promise<Journal> {
+  if (lastWrite && Date.now() - lastWrite.at < WRITE_TRUST_MS) {
+    return clone(lastWrite.journal);
+  }
   const text = await readBlobText(TRACKS_PATH);
   if (text === null) return { entries: [] };
   const parsed = JSON.parse(text) as Journal;
@@ -61,6 +85,7 @@ export async function readJournal(): Promise<Journal> {
 }
 
 export async function writeJournal(journal: Journal): Promise<void> {
+  lastWrite = { journal: clone(journal), at: Date.now() };
   await put(TRACKS_PATH, JSON.stringify(journal, null, 2), {
     access: "public",
     addRandomSuffix: false,
