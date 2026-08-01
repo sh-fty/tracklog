@@ -17,6 +17,7 @@ function providerFor(host: string): string {
   if (host.includes("music.apple")) return "apple music";
   if (host.includes("tidal")) return "tidal";
   if (host.includes("mixcloud")) return "mixcloud";
+  if (host.includes("shazam") || host === "shz.am") return "shazam";
   return host.replace(/^www\./, "");
 }
 
@@ -85,6 +86,25 @@ function splitTitle(
   return { title, artist };
 }
 
+// Last resort when nothing can be resolved. Many share links carry the song
+// name in the final path segment — Shazam's look like
+// /track/52803540/never-gonna-give-you-up — which beats showing a raw URL as
+// the title. Only used when the segment actually looks like a slug: it has to
+// contain a separator and a letter, so opaque ids like `t52803540` are left
+// alone and the URL is shown instead.
+export function titleFromUrl(url: string): string {
+  try {
+    const segments = new URL(url).pathname.split("/").filter(Boolean);
+    const last = decodeURIComponent(segments[segments.length - 1] ?? "");
+    if (/[-_]/.test(last) && /[a-z]/i.test(last)) {
+      return last.replace(/[-_]+/g, " ").trim();
+    }
+  } catch {
+    // fall through to the URL
+  }
+  return url;
+}
+
 export type TrackMeta = {
   provider: string;
   title: string;
@@ -143,13 +163,23 @@ export async function resolveMeta(url: string): Promise<TrackMeta> {
       signal: AbortSignal.timeout(8000),
       cache: "no-store",
     });
+    // An error page has a <title> too. Shazam answers 405 to anything that
+    // isn't a browser, and scraping that gave entries literally titled
+    // "405 Not allowed." Only a successful response is worth reading.
+    if (!res.ok) return { provider, title: titleFromUrl(url) };
+
     const html = await res.text();
     const rawTitle =
       ogTag(html, "og:title") ??
       decodeEntities(html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1] ?? "").trim();
     const { title, artist } = splitTitle(rawTitle);
-    return { provider, title: title || url, artist, art: ogTag(html, "og:image") };
+    return {
+      provider,
+      title: title || titleFromUrl(url),
+      artist,
+      art: ogTag(html, "og:image"),
+    };
   } catch {
-    return { provider, title: url };
+    return { provider, title: titleFromUrl(url) };
   }
 }

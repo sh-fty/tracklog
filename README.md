@@ -200,6 +200,18 @@ Optional env vars: `NEXT_PUBLIC_SITE_TITLE`, `NEXT_PUBLIC_SITE_TAGLINE`,
 `NEXT_PUBLIC_` values are baked in at build time, so changing them needs a
 redeploy.
 
+## Home screen
+
+The site ships a web app manifest and an apple-touch icon, so **Add to Home
+Screen** opens it standalone, without browser chrome.
+
+That also removes the reload button, which is why the nav row carries its own
+`↻ refresh`. It re-runs the server render rather than reloading the document,
+so the page doesn't blank. Native pull-to-refresh works too — it was being
+suppressed by an `overscroll-behavior-y: none` added for the app-like feel,
+now removed. Safe-area padding keeps the notch and home indicator off the
+masthead and footer.
+
 ## Blob usage
 
 Writes are the scarcest operation on the free tier, and this site used to spend
@@ -228,6 +240,12 @@ else. Writes happen only when you add, edit or delete a track.
   a 30-day CDN `max-age`; writes set `cacheControlMaxAge`, but Vercel clamps it
   to a 60s floor. A query-string cache-buster does not help — the CDN's cache
   key ignores the query string.
+- **Shazam links can't be resolved.** Shazam answers `405` to anything that
+  isn't a browser, and an error page still has a `<title>` — scraping it
+  produced entries literally called "405 Not allowed." Failed responses are now
+  ignored, and the title falls back to the URL's last path segment, so
+  `/track/52803540/never-gonna-give-you-up` logs as "never gonna give you up".
+  Use the edit panel's link field to point it at a real record later.
 - **Spotify never returns an artist.** Its oEmbed response has no
   `author_name` field at all, so Spotify entries land with a blank artist and
   you fill it in. SoundCloud and YouTube do return it.

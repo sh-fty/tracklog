@@ -2,6 +2,7 @@ import { isAdmin } from "@/lib/auth";
 import { embedFor } from "@/lib/embed";
 import { bumpHits, readJournal, type Journal } from "@/lib/store";
 import { deleteEntry, login, logout, saveEntry } from "./actions";
+import { RefreshButton } from "./refresh-button";
 import { TrackCard } from "./track-card";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +37,7 @@ export default async function Home({
         <p className="tagline">{TAGLINE}</p>
       </header>
       <nav className="navrow crs">
-        [ <a href="/">home</a> ] [ <a href="/feed.xml">rss</a> ]
+        [ <a href="/">home</a> ] [ <a href="/feed.xml">rss</a> ] <RefreshButton />
       </nav>
       {ABOUT && <div className="about bv">{ABOUT}</div>}
 

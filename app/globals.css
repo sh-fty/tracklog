@@ -208,6 +208,27 @@ summary:focus-visible {
   margin: 0 3px;
 }
 
+/* Sits in the nav row beside the links, not styled as a chunky button */
+.navbtn {
+  background: none;
+  border: 0;
+  padding: 0 2px;
+  margin-left: 6px;
+  font-size: 12px;
+  color: var(--linkblue);
+  cursor: pointer;
+}
+
+.navbtn:hover:enabled {
+  background: var(--amber);
+  color: var(--btn-ink);
+}
+
+.navbtn:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
 /* ---------- LCD ---------- */
 
 .about {
@@ -706,7 +727,6 @@ textarea {
     padding: 0;
     background-image: none;
     background-color: var(--face);
-    overscroll-behavior-y: none;
   }
 
   .col {
@@ -723,6 +743,13 @@ textarea {
      near-empty journal still fills the screen the way an app would. */
   .counterbox {
     margin-top: auto;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  /* Installed to the home screen there is no browser chrome, so the notch and
+     home indicator would otherwise sit on top of the page. */
+  .masthead {
+    padding-top: calc(9px + env(safe-area-inset-top));
   }
 }
 

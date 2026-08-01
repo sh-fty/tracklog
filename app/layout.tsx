@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // Lets iOS open it from the home screen without browser chrome.
+  appleWebApp: { capable: true, title: "trackl0g" },
   title: process.env.NEXT_PUBLIC_SITE_TITLE || "trackl0g",
   description:
     process.env.NEXT_PUBLIC_SITE_TAGLINE ||
