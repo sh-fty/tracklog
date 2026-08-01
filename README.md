@@ -74,8 +74,10 @@ curl -X POST https://YOUR-APP.vercel.app/api/add \
 
 ## Editing entries
 
-Visit `/admin`, enter your `JOURNAL_SECRET` once (stored as an httpOnly
-cookie for a year), and you can rewrite notes and moods, fix titles or artists
+Visit `/admin` and enter your `JOURNAL_SECRET` once. The session lasts a year;
+the cookie holds a hash derived from the secret rather than the secret itself,
+so your password isn't sitting in the browser or replayed on every request.
+Once in, you can rewrite notes and moods, fix titles or artists
 (Spotify's oEmbed doesn't return artist names, so you may want to fill those
 in), or delete entries. Deletes are immediate and there's no undo — it's a
 journal, not a database.

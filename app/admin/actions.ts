@@ -3,14 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { COOKIE_NAME, isAdmin, secretMatches } from "@/lib/auth";
+import { COOKIE_NAME, isAdmin, secretMatches, sessionToken } from "@/lib/auth";
 import { readJournal, writeJournal } from "@/lib/store";
 
 export async function login(formData: FormData) {
   const key = String(formData.get("key") ?? "");
   if (!secretMatches(key)) redirect("/admin?bad=1");
+  const token = sessionToken();
+  if (!token) redirect("/admin?bad=1");
   const jar = await cookies();
-  jar.set(COOKIE_NAME, key, {
+  jar.set(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
